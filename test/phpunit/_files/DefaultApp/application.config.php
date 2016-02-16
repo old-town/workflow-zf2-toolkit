@@ -1,7 +1,7 @@
 <?php
 
 use OldTown\Workflow\ZF2\Toolkit\PhpUnit\TestData\TestPaths;
-use OldTown\Workflow\Doctrine\ZF2\PhpUnit\Utils\InitTestAppListener;
+use \OldTown\Workflow\ZF2\Toolkit\PhpUnit\Utils\InitTestAppListener;
 
 return [
     'modules'                 => [
