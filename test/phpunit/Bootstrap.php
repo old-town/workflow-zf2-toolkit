@@ -59,6 +59,7 @@ class Bootstrap
                         'OldTown\\Workflow\\ZF2\\Toolkit' => __DIR__ . '/../../src/',
                         __NAMESPACE__ => __DIR__ . '/tests/',
                         'OldTown\\Workflow\\ZF2\\Toolkit\\PhpUnit\\TestData' => __DIR__ . '/_files',
+                        'OldTown\\Workflow\\ZF2\\Toolkit\\PhpUnit\\Utils' => __DIR__ . '/utils',
                     ]
                 ]
             ]);

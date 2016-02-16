@@ -22,13 +22,22 @@ class TestPaths
         return __DIR__ . '/../../../';
     }
 
+
     /**
-     * Путь до дефалтового конфига приложения
+     * Возвращает путь путь до директории в которой создаются прокси классы для сущностей доктрины
      *
      * @return string
      */
-    public static function getPathToIntegrationTest()
+    public static function getPathToDoctrineProxyDir()
     {
-        return __DIR__ . '/../_files/IntegrationTest/application.config.php';
+        return __DIR__ . '/../../../data/test/Proxies/';
+    }
+
+    /**
+     * Путь до конфига приложения по умолчанию
+     */
+    public static function getPathToDefaultAppConfig()
+    {
+        return  __DIR__ . '/../_files/DefaultApp/application.config.php';
     }
 }
