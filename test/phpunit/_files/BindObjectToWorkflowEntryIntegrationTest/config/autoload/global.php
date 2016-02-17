@@ -5,15 +5,35 @@
  */
 namespace OldTown\Workflow\ZF2\Toolkit\PhpUnit\TestData\BindObjectToWorkflowEntryIntegrationTest;
 
+
 use OldTown\Workflow\Basic\BasicWorkflow;
 use OldTown\Workflow\Loader\ArrayWorkflowFactory;
 use OldTown\Workflow\Loader\XmlWorkflowFactory;
 use OldTown\Workflow\Util\DefaultVariableResolver;
-use \OldTown\Workflow\ZF2\Toolkit\DoctrineWorkflowStory\DoctrineWorkflowStory;
+use OldTown\Workflow\ZF2\Toolkit\DoctrineWorkflowStory\DoctrineWorkflowStory;
 use OldTown\Workflow\Doctrine\ZF2\EntityManagerFactory;
 use OldTown\Workflow\ZF2\Toolkit\PhpUnit\TestData\TestPaths;
 
 return [
+    'router' => [
+        'routes' => [
+            'test' => [
+                'type' => 'Literal',
+                'options' => [
+                    'route' => 'test',
+                    'defaults'=> [
+                        'controller' => TestController::class,
+                        'action' => 'initialize',
+
+                        'workflowManagerName' => 'testWorkflowManager',
+                        'workflowActionName' => 'initAction',
+                        'workflowName' => 'test',
+
+                    ],
+                ],
+            ]
+        ]
+    ],
     'doctrine' => [
         'entitymanager' => [
             'test' => [
@@ -50,9 +70,14 @@ return [
                 'class'   => 'Doctrine\ORM\Mapping\Driver\DriverChain',
                 'drivers' => [
                     'OldTown\\Workflow\\Spi\\Doctrine\\Entity' => 'WorkflowDoctrineEntity',
-                    'OldTown\\Workflow\\ZF2\\Toolkit\\Entity' => 'entityToolkit'
+                    'OldTown\\Workflow\\ZF2\\Toolkit\\Entity' => 'entityToolkit',
+                    'OldTown\\Workflow\\ZF2\\Toolkit\\PhpUnit\\TestData\BindObjectToWorkflowEntryIntegrationTest\\Entity' => 'testEntity',
                 ]
-            ]
+            ],
+            'testEntity' => [
+                'paths' => stream_resolve_include_path(__DIR__ . '/../../Entity'),
+                'class' => 'Doctrine\ORM\Mapping\Driver\AnnotationDriver',
+            ],
         ]
     ],
     'workflow_zf2'    => [
@@ -89,6 +114,20 @@ return [
                 'configuration' => 'default',
                 'name' => BasicWorkflow::class
             ]
+        ],
+        'manager_aliases' => [
+            'testWfManager' => 'testWorkflowManager'
         ]
+    ],
+
+    'controllers' => [
+        'invokables' => [
+            TestController::class => TestController::class
+        ]
+    ],
+    'view_manager' => [
+        'template_map' => [
+            'old-town/test/initialize' => __DIR__ . '/../../view/test.phtml'
+        ],
     ]
 ];

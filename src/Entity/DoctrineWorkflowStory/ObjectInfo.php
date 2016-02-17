@@ -6,6 +6,7 @@
 namespace OldTown\Workflow\ZF2\Toolkit\Entity\DoctrineWorkflowStory;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\Mapping as ORM;
 
 /**
  * Class Object
@@ -61,11 +62,19 @@ class ObjectInfo
     /**
      * Все процессы workflow которые связанны с данным процесом
      *
-     * @ORM\ManyToMany(targetEntity="Entry", mappedBy="entries")
+     * @ORM\ManyToMany(targetEntity="ExtEntry", mappedBy="objectsInfo")
      *
-     * @var Entry[]|ArrayCollection
+     * @var ExtEntry[]|ArrayCollection
      */
     protected $entries;
+
+    /**
+     * ObjectInfo constructor.
+     */
+    public function __construct()
+    {
+        $this->entries = new ArrayCollection();
+    }
 
     /**
      * Уникальный id данных о объект
@@ -166,7 +175,7 @@ class ObjectInfo
     /**
      * Возвращает все процессы wf,в которых участвует объект
      *
-     * @return ArrayCollection|Entry[]
+     * @return ArrayCollection|ExtEntry[]
      */
     public function getEntries()
     {
@@ -176,18 +185,16 @@ class ObjectInfo
     /**
      * Добавляет процесс wf, в котором задействован объект
      *
-     * @param Entry $entry
+     * @param ExtEntry $entry
      *
      * @return $this
      */
-    public function addEntry(Entry $entry)
+    public function addEntry(ExtEntry $entry)
     {
-        $entry->addObjectInfo($this);
         if (!$this->getEntries()->contains($entry)) {
             $this->getEntries()->add($entry);
         }
 
         return $this;
     }
-
 }

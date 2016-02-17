@@ -5,7 +5,7 @@
  */
 namespace OldTown\Workflow\ZF2\Toolkit\Entity\DoctrineWorkflowStory;
 
-use OldTown\Workflow\Spi\Doctrine\Entity\Entry as BaseEntry;
+use OldTown\Workflow\Spi\Doctrine\Entity\AbstractEntry;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 
@@ -13,12 +13,12 @@ use Doctrine\Common\Collections\ArrayCollection;
  * Class Entry
  *
  * @ORM\Entity()
+ * @ORM\Table(name="wf_entry")
  *
  * @package OldTown\Workflow\ZF2\Toolkit\Entity\DoctrineWorkflowStory
  */
-class Entry extends BaseEntry
+class ExtEntry extends AbstractEntry
 {
-
     /**
      * Информация о объектах которые привязанны к процессу
      *
@@ -36,6 +36,16 @@ class Entry extends BaseEntry
      * @var ObjectInfo[]|ArrayCollection
      */
     protected $objectsInfo;
+
+    /**
+     * ExtEntry constructor.
+     */
+    public function __construct()
+    {
+        parent::__construct();
+        $this->objectsInfo = new ArrayCollection();
+    }
+
 
     /**
      * Возвращает инмформацию о всех объектах привязанных к данному процессу
@@ -56,7 +66,6 @@ class Entry extends BaseEntry
      */
     public function addObjectInfo(ObjectInfo $objectInfo)
     {
-        $objectInfo->addEntry($this);
         if (!$this->getObjectsInfo()->contains($objectInfo)) {
             $this->getObjectsInfo()->add($objectInfo);
         }

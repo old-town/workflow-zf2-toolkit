@@ -50,6 +50,21 @@ class BindObjectToWorkflowEntryIntegrationTest extends AbstractHttpControllerTes
             include TestPaths::getPathToBindObjectToWorkflowEntryIntegrationTest()
         );
 
-        $this->assertModulesLoaded(['OldTown\\Workflow\\ZF2\\Toolkit']);
+        $this->dispatch('test');
+
+
+
+
+
+//        /** @var BasicWorkflow $wfManager */
+//        $wfManager = $this->getApplicationServiceLocator()->get('workflow.manager.testWorkflowManager');
+//        $entryId = $wfManager->initialize('test', 1);
+//        $currentSteps = $wfManager->getCurrentSteps($entryId);
+//
+//        static::assertCount(1, $currentSteps);
+//        /** @var CurrentStepInterface $step */
+//        $step = current($currentSteps);
+//        static::assertInstanceOf(CurrentStep::class, $step);
+//        static::assertEquals(2, $step->getStepId());
     }
 }

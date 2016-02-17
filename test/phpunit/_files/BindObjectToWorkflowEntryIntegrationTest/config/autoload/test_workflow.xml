@@ -3,7 +3,18 @@
         "http://www.opensymphony.com/osworkflow/workflow_2_8.dtd">
 <workflow>
     <initial-actions>
-        <action id="1" name="StartWorkflow">
+        <action id="1" name="initAction">
+            <pre-functions>
+                <function type="service">
+                    <arg name="serviceName">\OldTown\Workflow\ZF2\Toolkit\DoctrineWorkflowStory\DoctrineWorkflowStoryService</arg>
+                    <arg name="serviceMethod">bindObjectToWorkflowEntry</arg>
+
+                    <arg name="objectParam">testObject</arg>
+                    <arg name="objectAlias">testObjectAlias</arg>
+                    <arg name="workflowManagerAlias">testWfManager</arg>
+
+                </function>
+            </pre-functions>
             <results>
                 <unconditional-result old-status="Finished" status="Underway" step="2"/>
             </results>

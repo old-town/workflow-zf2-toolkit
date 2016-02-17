@@ -6,7 +6,7 @@
 namespace OldTown\Workflow\ZF2\Toolkit\DoctrineWorkflowStory;
 
 use OldTown\Workflow\Spi\Doctrine\DoctrineWorkflowStory as BaseDoctrineWorkflowStory;
-use OldTown\Workflow\ZF2\Toolkit\Entity\DoctrineWorkflowStory\Entry;
+use OldTown\Workflow\ZF2\Toolkit\Entity\DoctrineWorkflowStory\ExtEntry;
 
 /**
  * Class DoctrineWorkflowStory
@@ -17,7 +17,6 @@ class DoctrineWorkflowStory extends BaseDoctrineWorkflowStory
 {
     public function __construct()
     {
-        $this->entityMap['entry'] = Entry::class;
+        $this->entityMap['entry'] = ExtEntry::class;
     }
-
 }
