@@ -40,4 +40,13 @@ class TestPaths
     {
         return  __DIR__ . '/../_files/DefaultApp/application.config.php';
     }
+
+
+    /**
+     * Путь до директории с конфигами для тестирования механизма привязка объектов к процесу workflow
+     */
+    public static function getPathToBindObjectToWorkflowEntryIntegrationTest()
+    {
+        return   __DIR__ . '/../_files/BindObjectToWorkflowEntryIntegrationTest/application.config.php';
+    }
 }

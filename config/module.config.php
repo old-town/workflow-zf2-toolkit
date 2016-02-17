@@ -12,6 +12,7 @@ $config = [
 ];
 
 return array_merge_recursive(
+    include __DIR__ . '/doctrine.config.php',
     include __DIR__ . '/serviceManager.config.php',
     include __DIR__ . '/validator.config.php',
     $config

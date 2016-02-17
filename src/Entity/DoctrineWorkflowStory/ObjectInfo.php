@@ -1,0 +1,193 @@
+<?php
+/**
+ * @link  https://github.com/old-town/workflow-zf2-toolkit
+ * @author  Malofeykin Andrey  <and-rey2@yandex.ru>
+ */
+namespace OldTown\Workflow\ZF2\Toolkit\Entity\DoctrineWorkflowStory;
+
+use Doctrine\Common\Collections\ArrayCollection;
+
+/**
+ * Class Object
+ *
+ * @ORM\Entity()
+ * @ORM\Table(name="wf_object_info")
+ *
+ * @package OldTown\Workflow\ZF2\Toolkit\Entity\DoctrineWorkflowStory
+ */
+class ObjectInfo
+{
+    /**
+     * Уникальный id данных о объекте
+     *
+     * @ORM\Id()
+     * @ORM\Column(name="id", type="integer")
+     * @ORM\GeneratedValue(strategy="IDENTITY")
+     *
+     * @var string
+     */
+    protected $id;
+
+    /**
+     * Имя класса объекта
+     *
+     * @ORM\Column(name="class_name", type="string", length=180)
+     *
+     *
+     * @var string
+     */
+    protected $className;
+
+    /**
+     * id объекта
+     *
+     * @ORM\Column(name="object_id", type="string", length=50)
+     *
+     *
+     * @var string
+     */
+    protected $objectId;
+
+    /**
+     * Псевдоним по которому можно обратиться к объекту
+     *
+     * @ORM\Column(name="alias", type="string", length=50)
+     *
+     *
+     * @var string
+     */
+    protected $alias;
+
+    /**
+     * Все процессы workflow которые связанны с данным процесом
+     *
+     * @ORM\ManyToMany(targetEntity="Entry", mappedBy="entries")
+     *
+     * @var Entry[]|ArrayCollection
+     */
+    protected $entries;
+
+    /**
+     * Уникальный id данных о объект
+     *
+     * @return string
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * Возвращает уникальный id данных о объект
+     *
+     * @param string $id
+     *
+     * @return $this
+     */
+    public function setId($id)
+    {
+        $this->id = $id;
+
+        return $this;
+    }
+
+    /**
+     * Имя класса объекта
+     *
+     * @return string
+     */
+    public function getClassName()
+    {
+        return $this->className;
+    }
+
+    /**
+     * Устанавливает имя класса объекта
+     *
+     * @param string $className
+     *
+     * @return $this
+     */
+    public function setClassName($className)
+    {
+        $this->className = $className;
+
+        return $this;
+    }
+
+    /**
+     * id объекта
+     *
+     * @return string
+     */
+    public function getObjectId()
+    {
+        return $this->objectId;
+    }
+
+    /**
+     * Устанвливает id объекта
+     *
+     * @param string $objectId
+     *
+     * @return $this
+     */
+    public function setObjectId($objectId)
+    {
+        $this->objectId = $objectId;
+
+        return $this;
+    }
+
+    /**
+     * Псевдоним по которому можно обратиться к объекту
+     *
+     * @return string
+     */
+    public function getAlias()
+    {
+        return $this->alias;
+    }
+
+    /**
+     * Устанавливает пседвоним по которому можно обратиться к объекту
+     *
+     * @param string $alias
+     *
+     * @return $this
+     */
+    public function setAlias($alias)
+    {
+        $this->alias = $alias;
+
+        return $this;
+    }
+
+    /**
+     * Возвращает все процессы wf,в которых участвует объект
+     *
+     * @return ArrayCollection|Entry[]
+     */
+    public function getEntries()
+    {
+        return $this->entries;
+    }
+
+    /**
+     * Добавляет процесс wf, в котором задействован объект
+     *
+     * @param Entry $entry
+     *
+     * @return $this
+     */
+    public function addEntry(Entry $entry)
+    {
+        $entry->addObjectInfo($this);
+        if (!$this->getEntries()->contains($entry)) {
+            $this->getEntries()->add($entry);
+        }
+
+        return $this;
+    }
+
+}
