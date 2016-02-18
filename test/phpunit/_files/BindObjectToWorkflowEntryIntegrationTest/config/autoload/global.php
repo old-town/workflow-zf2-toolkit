@@ -17,10 +17,10 @@ use OldTown\Workflow\ZF2\Toolkit\PhpUnit\TestData\TestPaths;
 return [
     'router' => [
         'routes' => [
-            'test' => [
-                'type' => 'Literal',
+            'testInitialize' => [
+                'type' => 'Segment',
                 'options' => [
-                    'route' => 'test',
+                    'route' => 'initialize/:expectedValue',
                     'defaults'=> [
                         'controller' => TestController::class,
                         'action' => 'initialize',
@@ -28,6 +28,20 @@ return [
                         'workflowManagerName' => 'testWorkflowManager',
                         'workflowActionName' => 'initAction',
                         'workflowName' => 'test',
+
+                    ],
+                ],
+            ],
+            'testDoAction' => [
+                'type' => 'Segment',
+                'options' => [
+                    'route' => 'doAction/:entryId',
+                    'defaults'=> [
+                        'controller' => TestController::class,
+                        'action' => 'do',
+
+                        'workflowManagerName' => 'testWorkflowManager',
+                        'workflowActionName' => 'dummyAction'
 
                     ],
                 ],
@@ -127,7 +141,8 @@ return [
     ],
     'view_manager' => [
         'template_map' => [
-            'old-town/test/initialize' => __DIR__ . '/../../view/test.phtml'
+            'old-town/test/initialize' => __DIR__ . '/../../view/initialize.phtml',
+            'old-town/test/do' => __DIR__ . '/../../view/do.phtml'
         ],
     ]
 ];

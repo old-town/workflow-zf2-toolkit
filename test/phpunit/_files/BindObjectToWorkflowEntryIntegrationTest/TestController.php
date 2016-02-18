@@ -33,8 +33,11 @@ class TestController extends AbstractActionController
      */
     public function prepareWorkflowDataHandler()
     {
+        $expectedValue = $this->getEvent()->getRouteMatch()->getParam('expectedValue');
+
+
         $testEntity = new TestEntity();
-        $testEntity->setValue('test');
+        $testEntity->setValue($expectedValue);
 
         /** @var EntityManager $em */
         $em = $this->getServiceLocator()->get('doctrine.entitymanager.test');
@@ -61,6 +64,19 @@ class TestController extends AbstractActionController
      * @WFD\PrepareData(type="method", handler="prepareWorkflowDataHandler", enabled=true)
      */
     public function initializeAction()
+    {
+        $this->getEvent()->getParam(Dispatcher::WORKFLOW_DISPATCH_EVENT);
+
+        $viewModel = new ViewModel();
+        $viewModel->setTerminal(true);
+
+        return $viewModel;
+    }
+
+    /**
+     * @WFD\WorkflowDispatch(enabled=true, activity="doAction")
+     */
+    public function doAction()
     {
         $this->getEvent()->getParam(Dispatcher::WORKFLOW_DISPATCH_EVENT);
 

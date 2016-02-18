@@ -14,4 +14,73 @@ use Zend\Stdlib\AbstractOptions;
  */
 class ModuleOptions extends AbstractOptions
 {
+    /**
+     * Наймспейс для сущностей.
+     *
+     * @var string
+     */
+    protected $rootEntityNamespace;
+
+    /**
+     * Карта доступа к сущностям
+     *
+     * @var array
+     */
+    protected $entityMap = [];
+
+    /**
+     * @return string
+     */
+    public function getRootEntityNamespace()
+    {
+        return $this->rootEntityNamespace;
+    }
+
+    /**
+     * @param string $rootEntityNamespace
+     *
+     * @return $this
+     */
+    public function setRootEntityNamespace($rootEntityNamespace)
+    {
+        $this->rootEntityNamespace = $rootEntityNamespace;
+
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getEntityMap()
+    {
+        return $this->entityMap;
+    }
+
+    /**
+     * @param array $entityMap
+     *
+     * @return $this
+     */
+    public function setEntityMap(array $entityMap = [])
+    {
+        $this->entityMap = $entityMap;
+
+        return $this;
+    }
+
+    /**
+     * Возвращает класс сущности по ее имени
+     *
+     * @param string $entity
+     *
+     * @return array|string
+     */
+    public function getEntityClassName($entity)
+    {
+        if (array_key_exists($entity, $this->entityMap)) {
+            return $this->entityMap;
+        }
+
+        return $this->rootEntityNamespace . $entity;
+    }
 }

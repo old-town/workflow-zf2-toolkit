@@ -7,7 +7,8 @@ namespace OldTown\Workflow\ZF2\Toolkit;
 
 $config = [
     'workflow_zf2_toolkit' => [
-
+        'rootEntityNamespace' => 'OldTown\\Workflow\\ZF2\\Toolkit\\Entity\\',
+        'entityMap' => []
     ]
 ];
 

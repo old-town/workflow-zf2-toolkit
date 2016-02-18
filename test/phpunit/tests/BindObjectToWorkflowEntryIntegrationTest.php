@@ -6,8 +6,13 @@
 namespace OldTown\Workflow\ZF2\Toolkit\PhpUnit\Test;
 
 use Doctrine\ORM\Tools\SchemaTool;
+use OldTown\Workflow\ZF2\Dispatch\Dispatcher\Dispatcher;
+use OldTown\Workflow\ZF2\Toolkit\Entity\DoctrineWorkflowStory\ExtEntry;
 use OldTown\Workflow\ZF2\Toolkit\PhpUnit\TestData\TestPaths;
+use Zend\Mvc\Application;
 use Zend\Test\PHPUnit\Controller\AbstractHttpControllerTestCase;
+use OldTown\Workflow\ZF2\Dispatch\Dispatcher\WorkflowDispatchEvent;
+use OldTown\Workflow\ZF2\Toolkit\PhpUnit\TestData\BindObjectToWorkflowEntryIntegrationTest\Entity\TestEntity;
 
 /**
  * Class BindObjectToWorkflowEntryIntegrationTest
@@ -40,31 +45,60 @@ class BindObjectToWorkflowEntryIntegrationTest extends AbstractHttpControllerTes
 
 
     /**
+     * Проверка работы сервиса привязыающего объект к процессу wf, и востанавливающий его.
+     *
+     * Для тестирования используется простое workflow состоящее из одного шага.
+     * При выполнении initAction происходит привязка процесса wf к объекту. Далее у единственного объявленного шага
+     * вызывается переход на самого себя. В рамках этого перехода происходит востановление привязанного объекта
+     *
+     * При тестирование используется тестовый контроллер с двумя action. Один из которых отвечает за вызов initAction у
+     * wf, а второй за вызов doAction.
+     *
+     * При вызове действия контроллера отвечающего за иницииирование wf, в качестве параметра передается тестовое значение.
+     * Это тестове значение записывается в свойство value \OldTown\Workflow\ZF2\Toolkit\PhpUnit\TestData\BindObjectToWorkflowEntryIntegrationTest\Entity\TestEntity.
+     *
+     * Далее вызывается doAction для уже созданного процесса wf. В рамках этого перехода, ожидаем что будет произведено
+     * востановление объекта.
+     *
+     * В случае успешной работы, сверяем ожидаемое значение, с значение извлеченным из востановленного объекта
      *
      * @return void
      */
-    public function testLoadModule()
+    public function testBindObjectToWorkflowEntry()
     {
         /** @noinspection PhpIncludeInspection */
         $this->setApplicationConfig(
             include TestPaths::getPathToBindObjectToWorkflowEntryIntegrationTest()
         );
 
-        $this->dispatch('test');
+        /** @var Application $app */
+        $app = $this->getApplication();
 
+        $expectedValue = 'test_completed';
+        $url = sprintf('initialize/%s', $expectedValue);
+        $this->dispatch($url);
 
+        /** @var WorkflowDispatchEvent $dispatchEvent */
+        $dispatchEvent = $app->getMvcEvent()->getParam(Dispatcher::WORKFLOW_DISPATCH_EVENT);
+        $transientVars = $dispatchEvent->getWorkflowResult()->getTransientVars();
 
+        /** @var ExtEntry $entry */
+        $entry = $transientVars['entry'];
 
+        $entryId = $entry->getId();
 
-//        /** @var BasicWorkflow $wfManager */
-//        $wfManager = $this->getApplicationServiceLocator()->get('workflow.manager.testWorkflowManager');
-//        $entryId = $wfManager->initialize('test', 1);
-//        $currentSteps = $wfManager->getCurrentSteps($entryId);
-//
-//        static::assertCount(1, $currentSteps);
-//        /** @var CurrentStepInterface $step */
-//        $step = current($currentSteps);
-//        static::assertInstanceOf(CurrentStep::class, $step);
-//        static::assertEquals(2, $step->getStepId());
+        $url = sprintf('doAction/%s', $entryId);
+        $this->dispatch($url);
+
+        /** @var WorkflowDispatchEvent $dispatchEvent */
+        $dispatchEvent = $app->getMvcEvent()->getParam(Dispatcher::WORKFLOW_DISPATCH_EVENT);
+        $transientVars = $dispatchEvent->getWorkflowResult()->getTransientVars();
+
+        /** @var TestEntity $testObject */
+        $testObject = $transientVars['actualResult'];
+
+        $actualValue = $testObject->getValue();
+
+        static::assertEquals($expectedValue, $actualValue);
     }
 }

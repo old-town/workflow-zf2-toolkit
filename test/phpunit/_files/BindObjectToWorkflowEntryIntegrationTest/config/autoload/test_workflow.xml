@@ -11,7 +11,7 @@
 
                     <arg name="objectParam">testObject</arg>
                     <arg name="objectAlias">testObjectAlias</arg>
-                    <arg name="workflowManagerAlias">testWfManager</arg>
+
 
                 </function>
             </pre-functions>
@@ -23,7 +23,17 @@
     <steps>
         <step id="2" name="First Draft">
             <actions>
-                <action id="811" name="Finish_First_Draft">
+                <action id="811" name="dummyAction">
+                    <pre-functions>
+                        <function type="service">
+                            <arg name="serviceName">\OldTown\Workflow\ZF2\Toolkit\DoctrineWorkflowStory\DoctrineWorkflowStoryService</arg>
+                            <arg name="serviceMethod">restoreObjectBindingToEntry</arg>
+
+                            <arg name="objectAlias">testObjectAlias</arg>
+                            <arg name="resultVariableName">actualResult</arg>
+
+                        </function>
+                    </pre-functions>
                     <results>
                         <unconditional-result old-status="Finished" status="Underway"  step="2"/>
                     </results>
