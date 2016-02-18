@@ -11,6 +11,7 @@ use Zend\ServiceManager\ServiceLocatorInterface;
 use OldTown\Workflow\ZF2\ServiceEngine\Workflow;
 use OldTown\Workflow\ZF2\Toolkit\Options\ModuleOptions;
 
+
 /**
  * Class DoctrineWorkflowStoryServiceFactory
  *
@@ -35,11 +36,13 @@ class DoctrineWorkflowStoryServiceFactory implements FactoryInterface
 
         $serializerManager = $appServiceLocator->get('SerializerAdapterManager');
         $moduleOptions = $appServiceLocator->get(ModuleOptions::class);
+        $workflowService  = $appServiceLocator->get(Workflow::class);
 
         return new DoctrineWorkflowStoryService(
             [
                 'serializerManager' => $serializerManager,
-                'moduleOptions' => $moduleOptions
+                'moduleOptions' => $moduleOptions,
+                'workflowService' => $workflowService
             ]
         );
     }

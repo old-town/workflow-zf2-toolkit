@@ -12,7 +12,7 @@ use OldTown\Workflow\ZF2\Toolkit\Entity\DoctrineWorkflowStory\ExtEntry;
 use OldTown\Workflow\ZF2\Toolkit\Entity\DoctrineWorkflowStory\ObjectInfo;
 use OldTown\Workflow\ZF2\Toolkit\Options\ModuleOptions;
 use ReflectionClass;
-
+use OldTown\Workflow\ZF2\ServiceEngine\WorkflowServiceInterface;
 
 /**
  * Class DoctrineWorkflowStoryService
@@ -50,6 +50,13 @@ class DoctrineWorkflowStoryService
     protected $moduleOptions;
 
     /**
+     * Сервис для работы с workflow
+     *
+     * @var WorkflowServiceInterface
+     */
+    protected $workflowService;
+
+    /**
      * DoctrineWorkflowStoryService constructor.
      *
      * @param array $options
@@ -58,19 +65,22 @@ class DoctrineWorkflowStoryService
     {
         $initOptions = [
             array_key_exists('serializerManager', $options) ? $options['serializerManager'] : null,
-            array_key_exists('moduleOptions', $options) ? $options['moduleOptions'] : null
+            array_key_exists('moduleOptions', $options) ? $options['moduleOptions'] : null,
+            array_key_exists('workflowService', $options) ? $options['workflowService'] : null
         ];
         call_user_func_array([$this, 'init'], $initOptions);
     }
 
     /**
-     * @param SerializerManager $serializerManager
-     * @param ModuleOptions     $moduleOptions
+     * @param SerializerManager        $serializerManager
+     * @param ModuleOptions            $moduleOptions
+     * @param WorkflowServiceInterface $workflowService
      */
-    protected function init(SerializerManager $serializerManager, ModuleOptions $moduleOptions)
+    protected function init(SerializerManager $serializerManager, ModuleOptions $moduleOptions, WorkflowServiceInterface $workflowService)
     {
         $this->setSerializerManager($serializerManager);
         $this->setModuleOptions($moduleOptions);
+        $this->setWorkflowService($workflowService);
     }
 
     /**
@@ -243,5 +253,41 @@ class DoctrineWorkflowStoryService
         $this->moduleOptions = $moduleOptions;
 
         return $this;
+    }
+
+    /**
+     * Сервис для работы с workflow
+     *
+     * @return WorkflowServiceInterface
+     */
+    public function getWorkflowService()
+    {
+        return $this->workflowService;
+    }
+
+    /**
+     * Устанавливает сервис для работы с workflow
+     *
+     * @param WorkflowServiceInterface $workflowService
+     *
+     * @return $this
+     */
+    public function setWorkflowService(WorkflowServiceInterface $workflowService)
+    {
+        $this->workflowService = $workflowService;
+
+        return $this;
+    }
+
+
+
+    /**
+     * @param $objectClassName
+     * @param $objectId
+     * @param $workflowName
+     * @param $workflowManagerName
+     */
+    public function getEntryId($objectClassName, $objectId, $workflowName, $workflowManagerName)
+    {
     }
 }
