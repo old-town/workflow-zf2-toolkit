@@ -19,6 +19,7 @@ use Doctrine\Common\Collections\ArrayCollection;
  */
 class ExtEntry extends AbstractEntry
 {
+
     /**
      * Информация о объектах которые привязанны к процессу
      *
