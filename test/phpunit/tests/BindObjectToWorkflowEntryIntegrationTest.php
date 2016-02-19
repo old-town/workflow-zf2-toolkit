@@ -7,7 +7,6 @@ namespace OldTown\Workflow\ZF2\Toolkit\PhpUnit\Test;
 
 use Doctrine\ORM\Tools\SchemaTool;
 use OldTown\Workflow\ZF2\Dispatch\Dispatcher\Dispatcher;
-use OldTown\Workflow\ZF2\Toolkit\Entity\DoctrineWorkflowStory\ExtEntry;
 use OldTown\Workflow\ZF2\Toolkit\PhpUnit\TestData\TestPaths;
 use Zend\Mvc\Application;
 use Zend\Test\PHPUnit\Controller\AbstractHttpControllerTestCase;
@@ -82,12 +81,10 @@ class BindObjectToWorkflowEntryIntegrationTest extends AbstractHttpControllerTes
         $dispatchEvent = $app->getMvcEvent()->getParam(Dispatcher::WORKFLOW_DISPATCH_EVENT);
         $transientVars = $dispatchEvent->getWorkflowResult()->getTransientVars();
 
-        /** @var ExtEntry $entry */
-        $entry = $transientVars['entry'];
+        /** @var TestEntity $testObject */
+        $testObject = $transientVars['testObject'];
 
-        $entryId = $entry->getId();
-
-        $url = sprintf('doAction/%s', $entryId);
+        $url = sprintf('doAction/%s', $testObject->getId());
         $this->dispatch($url);
 
         /** @var WorkflowDispatchEvent $dispatchEvent */

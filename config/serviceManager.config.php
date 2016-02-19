@@ -7,6 +7,8 @@ namespace OldTown\Workflow\ZF2\Toolkit;
 
 use OldTown\Workflow\ZF2\Toolkit\Options\ModuleOptions;
 use OldTown\Workflow\ZF2\Toolkit\Options\ModuleOptionsFactory;
+use OldTown\Workflow\ZF2\Toolkit\WorkflowRunParams\EntryIdResolver;
+use OldTown\Workflow\ZF2\Toolkit\WorkflowRunParams\EntryIdResolverFactory;
 
 return [
     'service_manager' => [
@@ -15,6 +17,7 @@ return [
         ],
         'factories'          => [
             ModuleOptions::class            => ModuleOptionsFactory::class,
+            EntryIdResolver::class => EntryIdResolverFactory::class
         ],
         'abstract_factories' => [
 

@@ -13,6 +13,7 @@ use OldTown\Workflow\Util\DefaultVariableResolver;
 use OldTown\Workflow\ZF2\Toolkit\DoctrineWorkflowStory\DoctrineWorkflowStory;
 use OldTown\Workflow\Doctrine\ZF2\EntityManagerFactory;
 use OldTown\Workflow\ZF2\Toolkit\PhpUnit\TestData\TestPaths;
+use \OldTown\Workflow\ZF2\Toolkit\PhpUnit\TestData\BindObjectToWorkflowEntryIntegrationTest\Entity\TestEntity;
 
 return [
     'router' => [
@@ -35,12 +36,13 @@ return [
             'testDoAction' => [
                 'type' => 'Segment',
                 'options' => [
-                    'route' => 'doAction/:entryId',
+                    'route' => 'doAction/:testObjectId',
                     'defaults'=> [
                         'controller' => TestController::class,
                         'action' => 'do',
 
                         'workflowManagerName' => 'testWorkflowManager',
+                        'workflowName' => 'test',
                         'workflowActionName' => 'dummyAction'
 
                     ],
@@ -128,9 +130,20 @@ return [
                 'configuration' => 'default',
                 'name' => BasicWorkflow::class
             ]
-        ],
-        'manager_aliases' => [
-            'testWfManager' => 'testWorkflowManager'
+        ]
+    ],
+    'workflow_zf2_toolkit' => [
+        'workflow_entry_to_object_metadata' => [
+            'test' => [
+                'workflowManagerName' => 'testWorkflowManager',
+                'workflowName' => 'test',
+                'map' => [
+                    'default' => [
+                        'entityClassName' => TestEntity::class,
+                        'routerParamName' => 'testObjectId'
+                    ]
+                ]
+            ]
         ]
     ],
 

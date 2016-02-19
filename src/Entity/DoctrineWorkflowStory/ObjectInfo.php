@@ -12,7 +12,12 @@ use Doctrine\ORM\Mapping as ORM;
  * Class Object
  *
  * @ORM\Entity()
- * @ORM\Table(name="wf_object_info")
+ * @ORM\Table(
+ *     name="wf_object_info",
+ *     indexes={
+ *         @ORM\Index(name="hash", columns={"hash"})
+ *     }
+ * )
  *
  * @package OldTown\Workflow\ZF2\Toolkit\Entity\DoctrineWorkflowStory
  */
@@ -69,6 +74,15 @@ class ObjectInfo
     protected $entries;
 
     /**
+     * Ключ для поиска
+     *
+     * @ORM\Column(name="hash", type="string", length=255)
+     *
+     * @var string
+     */
+    protected $hash;
+
+    /**
      * ObjectInfo constructor.
      */
     public function __construct()
@@ -120,6 +134,7 @@ class ObjectInfo
     public function setClassName($className)
     {
         $this->className = $className;
+        $this->updateHash();
 
         return $this;
     }
@@ -144,6 +159,7 @@ class ObjectInfo
     public function setObjectId($objectId)
     {
         $this->objectId = $objectId;
+        $this->updateHash();
 
         return $this;
     }
@@ -196,5 +212,18 @@ class ObjectInfo
         }
 
         return $this;
+    }
+
+    /**
+     * генерация хеша
+     *
+     * @return void
+     */
+    protected function updateHash()
+    {
+        $hash = $this->getClassName() . '_' . $this->getObjectId();
+        $base64Hash = base64_encode($hash);
+
+        $this->hash = $base64Hash;
     }
 }

@@ -29,6 +29,13 @@ class ModuleOptions extends AbstractOptions
     protected $entityMap = [];
 
     /**
+     * Метаданные для получения id процесса
+     *
+     * @var array
+     */
+    protected $workflowEntryToObjectMetadata = [];
+
+    /**
      * @return string
      */
     public function getRootEntityNamespace()
@@ -82,5 +89,29 @@ class ModuleOptions extends AbstractOptions
         }
 
         return $this->rootEntityNamespace . $entity;
+    }
+
+    /**
+     * Метаданные для получения id процесса
+     *
+     * @return array
+     */
+    public function getWorkflowEntryToObjectMetadata()
+    {
+        return $this->workflowEntryToObjectMetadata;
+    }
+
+    /**
+     * Устанавливает метаданные для получения id процесса
+     *
+     * @param array $workflowEntryToObjectMetadata
+     *
+     * @return $this
+     */
+    public function setWorkflowEntryToObjectMetadata(array $workflowEntryToObjectMetadata = [])
+    {
+        $this->workflowEntryToObjectMetadata = $workflowEntryToObjectMetadata;
+
+        return $this;
     }
 }

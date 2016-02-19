@@ -57,6 +57,13 @@ class DoctrineWorkflowStoryService
     protected $workflowService;
 
     /**
+     * Сериалайзер
+     *
+     * @var Serializer
+     */
+    protected $serializer;
+
+    /**
      * DoctrineWorkflowStoryService constructor.
      *
      * @param array $options
@@ -117,7 +124,11 @@ class DoctrineWorkflowStoryService
         $serializer = $this->getSerializerManager()->get($serializerName);
 
         $id = $metadata->getIdentifierValues($object);
-        $serializedId = $serializer->serialize($id);
+        $prepareId = [];
+        foreach ($id as $idField => $idValue) {
+            $prepareId[$idField] = (string)$idValue;
+        }
+        $serializedId = $serializer->serialize($prepareId);
 
         $objectInfoClass = $this->getModuleOptions()->getEntityClassName('DoctrineWorkflowStory\\ObjectInfo');
 
@@ -173,9 +184,7 @@ class DoctrineWorkflowStoryService
 
                 $em = $store->getEntityManager();
 
-                $serializerName = $this->getSerializerName();
-                /** @var Serializer $serializer */
-                $serializer = $this->getSerializerManager()->get($serializerName);
+                $serializer = $this->getSerializer();
 
                 $serializedId = $objectInfo->getObjectId();
                 $id = $serializer->unserialize($serializedId);
@@ -289,5 +298,26 @@ class DoctrineWorkflowStoryService
      */
     public function getEntryId($objectClassName, $objectId, $workflowName, $workflowManagerName)
     {
+    }
+
+    /**
+     * @return Serializer
+     *
+     * @throws \Zend\ServiceManager\Exception\ServiceNotFoundException
+     * @throws \Zend\ServiceManager\Exception\ServiceNotCreatedException
+     * @throws \Zend\ServiceManager\Exception\RuntimeException
+     */
+    public function getSerializer()
+    {
+        if ($this->serializer) {
+            return $this->serializer;
+        }
+
+        $serializerName = $this->getSerializerName();
+        /** @var Serializer $serializer */
+        $serializer = $this->getSerializerManager()->get($serializerName);
+        $this->serializer = $serializer;
+
+        return $this->serializer;
     }
 }

@@ -12,7 +12,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 /**
  * Class Entry
  *
- * @ORM\Entity()
+ * @ORM\Entity(repositoryClass="\OldTown\Workflow\ZF2\Toolkit\EntityRepository\DoctrineWorkflowStory\ExtEntryRepository")
  * @ORM\Table(name="wf_entry")
  *
  * @package OldTown\Workflow\ZF2\Toolkit\Entity\DoctrineWorkflowStory

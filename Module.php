@@ -6,6 +6,7 @@
 namespace OldTown\Workflow\ZF2\Toolkit;
 
 
+use OldTown\Workflow\ZF2\Toolkit\WorkflowRunParams\EntryIdResolver;
 use Zend\Mvc\ModuleRouteListener;
 use Zend\Mvc\MvcEvent;
 use Zend\EventManager\EventInterface;
@@ -61,6 +62,11 @@ class Module implements
         $moduleRouteListener = new ModuleRouteListener();
         $moduleRouteListener->attach($eventManager);
 
+        $sm = $e->getApplication()->getServiceManager();
+
+        /** @var EntryIdResolver $entryIdResolver */
+        $entryIdResolver = $sm->get(EntryIdResolver::class);
+        $eventManager->attach($entryIdResolver);
     }
 
 
