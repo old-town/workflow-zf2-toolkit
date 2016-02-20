@@ -9,9 +9,8 @@ use Zend\Mvc\Application;
 use Zend\ServiceManager\FactoryInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
 use OldTown\Workflow\ZF2\Service\Service\Manager as WorkflowServiceManager;
-use OldTown\Workflow\ZF2\Toolkit\DoctrineWorkflowStory\DoctrineWorkflowStoryService;
+use OldTown\Workflow\ZF2\Toolkit\EntryToObjects\EntryToObjectsService;
 use OldTown\Workflow\ZF2\Toolkit\Options\ModuleOptions;
-use OldTown\Workflow\ZF2\ServiceEngine\Workflow as WorkflowService;
 
 /**
  * Class EntryIdResolverFactory
@@ -33,24 +32,18 @@ class EntryIdResolverFactory implements FactoryInterface
         /** @var WorkflowServiceManager $wfServiceManager */
         $wfServiceManager = $serviceLocator->get(WorkflowServiceManager::class);
 
-        /** @var DoctrineWorkflowStoryService $doctrineWorkflowStoryService */
-        $doctrineWorkflowStoryService = $wfServiceManager->get(DoctrineWorkflowStoryService::class);
+        /** @var EntryToObjectsService $entryToObjectsService */
+        $entryToObjectsService = $wfServiceManager->get(EntryToObjectsService::class);
         $moduleOptions = $serviceLocator->get(ModuleOptions::class);
-
-        $workflowService = $serviceLocator->get(WorkflowService::class);
 
         /** @var Application $app */
         $app = $serviceLocator->get('Application');
         $mvcEvent = $app->getMvcEvent();
 
-        $serializer = $doctrineWorkflowStoryService->getSerializer();
-
         $options = [
-            'doctrineWorkflowStoryService' => $doctrineWorkflowStoryService,
+            'entryToObjectsService' => $entryToObjectsService,
             'moduleOptions'                => $moduleOptions,
-            'workflowService'              => $workflowService,
-            'mvcEvent'                   => $mvcEvent,
-            'serializer'                   => $serializer
+            'mvcEvent'                   => $mvcEvent
         ];
 
         return new EntryIdResolver($options);

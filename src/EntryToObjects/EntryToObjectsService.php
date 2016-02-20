@@ -3,8 +3,9 @@
  * @link    https://github.com/old-town/workflow-zf2-toolkit
  * @author  Malofeykin Andrey  <and-rey2@yandex.ru>
  */
-namespace OldTown\Workflow\ZF2\Toolkit\DoctrineWorkflowStory;
+namespace OldTown\Workflow\ZF2\Toolkit\EntryToObjects;
 
+use OldTown\Workflow\ZF2\Toolkit\EntityRepository\DoctrineWorkflowStory\ExtEntryRepository;
 use Zend\Serializer\AdapterPluginManager as SerializerManager;
 use OldTown\Workflow\ZF2\Service\Annotation as WFS;
 use Zend\Serializer\Adapter\AdapterInterface as Serializer;
@@ -13,13 +14,14 @@ use OldTown\Workflow\ZF2\Toolkit\Entity\DoctrineWorkflowStory\ObjectInfo;
 use OldTown\Workflow\ZF2\Toolkit\Options\ModuleOptions;
 use ReflectionClass;
 use OldTown\Workflow\ZF2\ServiceEngine\WorkflowServiceInterface;
+use OldTown\Workflow\ZF2\Toolkit\DoctrineWorkflowStory\DoctrineWorkflowStory;
 
 /**
- * Class DoctrineWorkflowStoryService
+ * Class EntryToObjectsService
  *
- * @package OldTown\Workflow\ZF2\Toolkit\DoctrineWorkflowStory
+ * @package OldTown\Workflow\ZF2\Toolkit\EntryToObjects
  */
-class DoctrineWorkflowStoryService
+class EntryToObjectsService
 {
     /**
      * Псевдоним для объектов по умолчанию
@@ -204,6 +206,60 @@ class DoctrineWorkflowStoryService
         throw new Exception\InvalidArgumentException($errMsg);
     }
 
+
+    /**
+     * Получене информации о процессе на основе данных о объекта привязанных к процессу
+     *
+     * @param string $managerName
+     * @param string $workflowName
+     * @param array  $objectsInfo
+     *
+     * @return ExtEntry|null
+     *
+     * @throws Exception\InvalidGetEntryByObjectsInfoException
+     * @throws \Zend\Serializer\Exception\ExceptionInterface
+     */
+    public function getEntryByObjectsInfo($managerName, $workflowName, array $objectsInfo = [])
+    {
+        try {
+            $workflowManager = $this->getWorkflowService()->getWorkflowManager($managerName);
+
+
+            $store = $workflowManager->getConfiguration()->getWorkflowStore();
+
+            if (!$store instanceof DoctrineWorkflowStory) {
+                $errMsg = sprintf('Workflow store not implement %s', DoctrineWorkflowStory::class);
+                throw new Exception\InvalidWorkflowStoreException($errMsg);
+            }
+            $em = $store->getEntityManager();
+
+            $serializer = $this->getSerializer();
+            $objectHash = [];
+            foreach ($objectsInfo as $entityClassName => $entityId) {
+                $identifierFieldName = $em->getClassMetadata($entityClassName)->getSingleIdentifierFieldName();
+                $id = [
+                    $identifierFieldName => (string)$entityId
+                ];
+
+                $serializedId = $serializer->serialize($id);
+
+                $hash = $entityClassName . '_' . $serializedId;
+                $base64Hash = base64_encode($hash);
+
+                $objectHash[$base64Hash] = $base64Hash;
+            }
+
+            $extEntryClassName = $this->getModuleOptions()->getEntityClassName('DoctrineWorkflowStory\ExtEntry');
+            /** @var ExtEntryRepository $extEntryRepository */
+            $extEntryRepository = $em->getRepository($extEntryClassName);
+
+            $entry = $extEntryRepository->findEntryByObjectInfo($workflowName, $objectHash);
+        } catch (\Exception $e) {
+            throw new Exception\InvalidGetEntryByObjectsInfoException($e->getMessage(), $e->getCode(), $e);
+        }
+        return $entry;
+    }
+
     /**
      * @return SerializerManager
      */
@@ -288,17 +344,6 @@ class DoctrineWorkflowStoryService
         return $this;
     }
 
-
-
-    /**
-     * @param $objectClassName
-     * @param $objectId
-     * @param $workflowName
-     * @param $workflowManagerName
-     */
-    public function getEntryId($objectClassName, $objectId, $workflowName, $workflowManagerName)
-    {
-    }
 
     /**
      * @return Serializer

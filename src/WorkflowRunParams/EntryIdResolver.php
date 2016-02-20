@@ -9,12 +9,8 @@ use Zend\EventManager\AbstractListenerAggregate;
 use Zend\EventManager\EventManagerInterface;
 use OldTown\Workflow\ZF2\Dispatch\RunParamsHandler\RouteHandler;
 use OldTown\Workflow\ZF2\Dispatch\RunParamsHandler\RouteHandler\ResolveEntryIdEventInterface;
-use OldTown\Workflow\ZF2\Toolkit\DoctrineWorkflowStory\DoctrineWorkflowStoryService;
+use OldTown\Workflow\ZF2\Toolkit\EntryToObjects\EntryToObjectsService;
 use OldTown\Workflow\ZF2\Toolkit\Options\ModuleOptions;
-use OldTown\Workflow\ZF2\ServiceEngine\Workflow as WorkflowService;
-use OldTown\Workflow\ZF2\Toolkit\DoctrineWorkflowStory\DoctrineWorkflowStory;
-use Zend\Serializer\Adapter\AdapterInterface as Serializer;
-use OldTown\Workflow\ZF2\Toolkit\EntityRepository\DoctrineWorkflowStory\ExtEntryRepository;
 use Zend\Mvc\MvcEvent;
 
 /**
@@ -63,9 +59,9 @@ class EntryIdResolver extends AbstractListenerAggregate
     /**
      * Сервис реализующий функционал, для привязки процессов wf и информации о объектаъ
      *
-     * @var DoctrineWorkflowStoryService
+     * @var EntryToObjectsService
      */
-    protected $doctrineWorkflowStoryService;
+    protected $entryToObjectsService;
 
     /**
      * Настройки модуля
@@ -82,21 +78,9 @@ class EntryIdResolver extends AbstractListenerAggregate
     protected $indexMetadata;
 
     /**
-     * Сервис для работы с wf
-     *
-     * @var WorkflowService
-     */
-    protected $workflowService;
-
-    /**
      * @var MvcEvent
      */
     protected $mvcEvent;
-
-    /**
-     * @var Serializer
-     */
-    protected $serializer;
 
     /**
      * EntryIdResolver constructor.
@@ -106,34 +90,26 @@ class EntryIdResolver extends AbstractListenerAggregate
     public function __construct(array $options = [])
     {
         $initOptions = [
-            array_key_exists('doctrineWorkflowStoryService', $options) ? $options['doctrineWorkflowStoryService'] : null,
+            array_key_exists('entryToObjectsService', $options) ? $options['entryToObjectsService'] : null,
             array_key_exists('moduleOptions', $options) ? $options['moduleOptions'] : null,
-            array_key_exists('workflowService', $options) ? $options['workflowService'] : null,
-            array_key_exists('mvcEvent', $options) ? $options['mvcEvent'] : null,
-            array_key_exists('serializer', $options) ? $options['serializer'] : null,
+            array_key_exists('mvcEvent', $options) ? $options['mvcEvent'] : null
         ];
         call_user_func_array([$this, 'init'], $initOptions);
     }
 
     /**
-     * @param DoctrineWorkflowStoryService $doctrineWorkflowStoryService
+     * @param EntryToObjectsService $entryToObjectsService
      * @param ModuleOptions                $moduleOptions
-     * @param WorkflowService              $workflowService
      * @param MvcEvent                     $mvcEvent
-     * @param Serializer                   $serializer
      */
     protected function init(
-        DoctrineWorkflowStoryService $doctrineWorkflowStoryService,
+        EntryToObjectsService $entryToObjectsService,
         ModuleOptions $moduleOptions,
-        WorkflowService $workflowService,
-        MvcEvent $mvcEvent,
-        Serializer $serializer
+        MvcEvent $mvcEvent
     ) {
-        $this->setDoctrineWorkflowStoryService($doctrineWorkflowStoryService);
+        $this->setEntryToObjectsService($entryToObjectsService);
         $this->setModuleOptions($moduleOptions);
-        $this->setWorkflowService($workflowService);
         $this->setMvcEvent($mvcEvent);
-        $this->setSerializer($serializer);
     }
 
     /**
@@ -149,16 +125,12 @@ class EntryIdResolver extends AbstractListenerAggregate
      *
      * @param ResolveEntryIdEventInterface $resolveEntryIdEvent
      *
-     * @return null|void
-     * @throws Exception\InvalidWorkflowEntryToObjectMetadataException
-     * @throws \OldTown\Workflow\ZF2\ServiceEngine\Exception\InvalidManagerNameException
-     * @throws \Zend\ServiceManager\Exception\ServiceNotFoundException
-     * @throws \OldTown\Workflow\ZF2\ServiceEngine\Exception\InvalidWorkflowManagerException
-     * @throws \OldTown\Workflow\Spi\Doctrine\Exception\DoctrineRuntimeException
-     * @throws \Doctrine\ORM\Mapping\MappingException
+     *
+     * @return null|string
+     *
+     * @throws \OldTown\Workflow\ZF2\Toolkit\EntryToObjects\Exception\InvalidGetEntryByObjectsInfoException
+     * @throws \OldTown\Workflow\ZF2\Toolkit\WorkflowRunParams\Exception\InvalidWorkflowEntryToObjectMetadataException
      * @throws \Zend\Serializer\Exception\ExceptionInterface
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\NoResultException
      */
     public function onResolveEntryId(ResolveEntryIdEventInterface $resolveEntryIdEvent)
     {
@@ -174,44 +146,19 @@ class EntryIdResolver extends AbstractListenerAggregate
             return null;
         }
 
-        $workflowManager = $this->getWorkflowService()->getWorkflowManager($managerName);
-
-        $store = $workflowManager->getConfiguration()->getWorkflowStore();
-
-        if (!$store instanceof DoctrineWorkflowStory) {
-            return null;
-        }
-        $em = $store->getEntityManager();
-
-        $objectHash = [];
         $routeMatch = $this->getMvcEvent()->getRouteMatch();
-
-        $serializer = $this->getSerializer();
-
+        $objectsInfo = [];
         foreach ($index[$managerName][$workflowName] as $entityClassName => $routerParamName) {
             $entityId = $routeMatch->getParam($routerParamName, null);
             if (null === $entityId) {
                 return null;
             }
 
-            $identifierFieldName = $em->getClassMetadata($entityClassName)->getSingleIdentifierFieldName();
-            $id = [
-                $identifierFieldName => (string)$entityId
-            ];
-
-            $serializedId = $serializer->serialize($id);
-
-            $hash = $entityClassName . '_' . $serializedId;
-            $base64Hash = base64_encode($hash);
-
-            $objectHash[$base64Hash] = $base64Hash;
+            $objectsInfo[$entityClassName] = $entityId;
         }
 
-        $extEntryClassName = $this->getModuleOptions()->getEntityClassName('DoctrineWorkflowStory\ExtEntry');
-        /** @var ExtEntryRepository $extEntryRepository */
-        $extEntryRepository = $em->getRepository($extEntryClassName);
+        $entry = $this->getEntryToObjectsService()->getEntryByObjectsInfo($managerName, $workflowName, $objectsInfo);
 
-        $entry = $extEntryRepository->findEntryByObjectInfo($workflowName, $objectHash);
         if (null === $entry) {
             return null;
         }
@@ -304,23 +251,23 @@ class EntryIdResolver extends AbstractListenerAggregate
     /**
      * Сервис реализующий функционал, для привязки процессов wf и информации о объектаъ
      *
-     * @return DoctrineWorkflowStoryService
+     * @return EntryToObjectsService
      */
-    public function getDoctrineWorkflowStoryService()
+    public function getEntryToObjectsService()
     {
-        return $this->doctrineWorkflowStoryService;
+        return $this->entryToObjectsService;
     }
 
     /**
      * Устанавливает сервис реализующий функционал, для привязки процессов wf и информации о объектаъ
      *
-     * @param DoctrineWorkflowStoryService $doctrineWorkflowStoryService
+     * @param EntryToObjectsService $entryToObjectsService
      *
      * @return $this
      */
-    public function setDoctrineWorkflowStoryService(DoctrineWorkflowStoryService $doctrineWorkflowStoryService)
+    public function setEntryToObjectsService(EntryToObjectsService $entryToObjectsService)
     {
-        $this->doctrineWorkflowStoryService = $doctrineWorkflowStoryService;
+        $this->entryToObjectsService = $entryToObjectsService;
 
         return $this;
     }
@@ -350,26 +297,6 @@ class EntryIdResolver extends AbstractListenerAggregate
     }
 
     /**
-     * @return WorkflowService
-     */
-    public function getWorkflowService()
-    {
-        return $this->workflowService;
-    }
-
-    /**
-     * @param WorkflowService $workflowService
-     *
-     * @return $this
-     */
-    public function setWorkflowService(WorkflowService $workflowService)
-    {
-        $this->workflowService = $workflowService;
-
-        return $this;
-    }
-
-    /**
      * @return MvcEvent
      */
     public function getMvcEvent()
@@ -385,26 +312,6 @@ class EntryIdResolver extends AbstractListenerAggregate
     public function setMvcEvent(MvcEvent $mvcEvent)
     {
         $this->mvcEvent = $mvcEvent;
-
-        return $this;
-    }
-
-    /**
-     * @return Serializer
-     */
-    public function getSerializer()
-    {
-        return $this->serializer;
-    }
-
-    /**
-     * @param Serializer $serializer
-     *
-     * @return $this
-     */
-    public function setSerializer(Serializer $serializer)
-    {
-        $this->serializer = $serializer;
 
         return $this;
     }

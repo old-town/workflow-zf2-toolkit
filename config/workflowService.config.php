@@ -5,8 +5,8 @@
  */
 namespace OldTown\Workflow\ZF2\Toolkit;
 
-use OldTown\Workflow\ZF2\Toolkit\DoctrineWorkflowStory\DoctrineWorkflowStoryService;
-use OldTown\Workflow\ZF2\Toolkit\DoctrineWorkflowStory\DoctrineWorkflowStoryServiceFactory;
+use OldTown\Workflow\ZF2\Toolkit\EntryToObjects\EntryToObjectsService;
+use OldTown\Workflow\ZF2\Toolkit\EntryToObjects\EntryToObjectsServiceFactory;
 
 return [
     'workflow_zf2_service' => [
@@ -14,7 +14,7 @@ return [
 
         ],
         'factories'          => [
-            DoctrineWorkflowStoryService::class            => DoctrineWorkflowStoryServiceFactory::class,
+            EntryToObjectsService::class            => EntryToObjectsServiceFactory::class,
         ],
         'abstract_factories' => [
 

@@ -3,7 +3,7 @@
  * @link  https://github.com/old-town/workflow-zf2-toolkit
  * @author  Malofeykin Andrey  <and-rey2@yandex.ru>
  */
-namespace OldTown\Workflow\ZF2\Toolkit\DoctrineWorkflowStory;
+namespace OldTown\Workflow\ZF2\Toolkit\EntryToObjects;
 
 use Zend\ServiceManager\AbstractPluginManager;
 use Zend\ServiceManager\FactoryInterface;
@@ -13,16 +13,16 @@ use OldTown\Workflow\ZF2\Toolkit\Options\ModuleOptions;
 
 
 /**
- * Class DoctrineWorkflowStoryServiceFactory
+ * Class EntryToObjectsServiceFactory
  *
- * @package OldTown\Workflow\ZF2\Toolkit\DoctrineWorkflowStory
+ * @package OldTown\Workflow\ZF2\Toolkit\EntryToObjects
  */
-class DoctrineWorkflowStoryServiceFactory implements FactoryInterface
+class EntryToObjectsServiceFactory implements FactoryInterface
 {
     /**
      * @param ServiceLocatorInterface $serviceLocator
      *
-     * @return DoctrineWorkflowStoryService
+     * @return EntryToObjectsService
      * @throws \Zend\ServiceManager\Exception\ServiceNotFoundException
      */
     public function createService(ServiceLocatorInterface $serviceLocator)
@@ -38,7 +38,7 @@ class DoctrineWorkflowStoryServiceFactory implements FactoryInterface
         $moduleOptions = $appServiceLocator->get(ModuleOptions::class);
         $workflowService  = $appServiceLocator->get(Workflow::class);
 
-        return new DoctrineWorkflowStoryService(
+        return new EntryToObjectsService(
             [
                 'serializerManager' => $serializerManager,
                 'moduleOptions' => $moduleOptions,
