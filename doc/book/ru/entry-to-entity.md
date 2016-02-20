@@ -71,4 +71,56 @@ use \OldTown\Workflow\ZF2\Toolkit\DoctrineWorkflowStory\DoctrineWorkflowStory
 
 ```
 
+# Сервис для работы с процессом wf и сущностями \OldTown\Workflow\ZF2\Toolkit\EntryToObjects\EntryToObjectsService
+ 
+ Сервис содержит в себе базовый функционал для привязки объектов к процессу, востановлению объектов на основе данных о процессе,
+ получение процесса по данным о привязанном объекте. Сервис предназначен для использования в wf.
+ 
+ Метод|Описание 
+ ---------------------------|-------------------------------------------------------------------------------------------
+ bindObjectToWorkflowEntry  |Привязать объект к процессу
+ restoreObjectBindingToEntry|Востоновить объект привязанный к процессу
+ getEntryByObjectsInfo      |Получить информацию о процессе на основе данных о объектах
+ 
+ Для удобной работы с данным сервисом в контроллерах, добавлен плагин для контроллера \OldTown\Workflow\ZF2\Toolkit\EntryToObjects\EntryToObjectsControllerPlugin,
+ доступный по псевдониму workflowEntryToObjects. Этот плагин является оберткой для сервиса.
+ 
+# Автоматическое получение id процесса на основе данных о привязанных объектах.
+
+В модуле реализован обработчик \OldTown\Workflow\ZF2\Toolkit\WorkflowRunParams\EntryIdResolver события workflow.dispatch.resolveEntryId
+сервиса \OldTown\Workflow\ZF2\Dispatch\RunParamsHandler\RouteHandler\ResolveEntryIdEvent.
+
+Данный обработчик позволяет на основе конфигов получить значение id процесса wf, на основе значения id сущности.
+
+Для осуществления процесса получения id необходимо в конфигах описать метаданные для маппинга:
+
+```php
+return [
+    'workflow_entry_to_object_metadata' => [
+        'key' => [
+            'workflowManagerName' => $workflowManagerName,
+            'workflowName'        => $workflowName,
+            'map' => [
+                'key1' => [
+                   'entityClassName' => $entityClassName,
+                   'routerParamName' => $routeParamName
+                ]
+            ]
+        ]
+    ]
+];
+```
+
+Где:
+* $workflowManagerName - имя менеджера workflow
+* $workflowName        - имя используемого workflow
+* $entityClassName     - имя класса сущности которая привязывается к процессу wf
+* $routeParamName      - имя параметра роутера, по которому можно получить id сущности
+ 
+ 
+ 
+ 
+ 
+ 
+
 

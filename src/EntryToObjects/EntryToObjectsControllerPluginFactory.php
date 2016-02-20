@@ -5,6 +5,7 @@
  */
 namespace OldTown\Workflow\ZF2\Toolkit\EntryToObjects;
 
+use Zend\ServiceManager\AbstractPluginManager;
 use Zend\ServiceManager\FactoryInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
 
@@ -23,8 +24,14 @@ class EntryToObjectsControllerPluginFactory implements FactoryInterface
      */
     public function createService(ServiceLocatorInterface $serviceLocator)
     {
+        $appServiceLocator = $serviceLocator;
+        if ($serviceLocator instanceof AbstractPluginManager) {
+            $appServiceLocator = $serviceLocator->getServiceLocator();
+        }
+
+
         /** @var EntryToObjectsService $entryToObjectsService */
-        $entryToObjectsService = $serviceLocator->get(EntryToObjectsService::class);
+        $entryToObjectsService = $appServiceLocator->get(EntryToObjectsService::class);
 
         $options = [
             'entryToObjectsService' => $entryToObjectsService
