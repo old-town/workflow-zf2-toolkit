@@ -1,6 +1,7 @@
 docs_dir: doc/book/ru
 pages:
     - index.md
+    - 'Сущности и процессы wf': entry-to-entity.md
 site_name: workflow-zf2-toolkit
 site_description: 'Набор утилит и сервисов для работы с workflow,zf2,doctrine'
 repo_url: 'https://github.com/old-town/workflow-zf2-toolkit'
