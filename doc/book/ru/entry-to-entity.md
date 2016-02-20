@@ -112,6 +112,7 @@ return [
 ```
 
 Где:
+
 * $workflowManagerName - имя менеджера workflow
 * $workflowName        - имя используемого workflow
 * $entityClassName     - имя класса сущности которая привязывается к процессу wf
