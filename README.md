@@ -11,8 +11,6 @@ Develop:
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/old-town/workflow-zf2-dispatch/badges/quality-score.png?b=dev)](https://scrutinizer-ci.com/g/old-town/workflow-zf2-dispatch/?branch=dev)
 
 
-
-
 = Описание модуля =
 Набор утилит и сервисов для работы с workflow,zf2,doctrine
 
