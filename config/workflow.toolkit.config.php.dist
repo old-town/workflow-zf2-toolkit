@@ -22,10 +22,16 @@ return [
          *     'key' => [
          *         'workflowManagerName' => $workflowManagerName,
          *         'workflowName'        => $workflowName,
+         *         'routeName'           => $routeName
          *         'map' => [
          *              'key1' => [
          *                  'entityClassName' => $entityClassName,
-         *                  'routerParamName' => $routeParamName
+         *                  'identifiersMap' => [
+         *                     $propertyName => [
+         *                          'mode' => 'param|query'
+         *                          'name' => $name
+         *                     ]
+         *                  ]
          *              ]
          *          ]
          *     ]
