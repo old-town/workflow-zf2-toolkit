@@ -1,8 +1,9 @@
 <?php
 /**
  * @link     https://github.com/old-town/workflow-zf2-toolkit
- * @author  Malofeykin Andrey  <and-rey2@yandex.ru>
+ * @author   Malofeykin Andrey  <and-rey2@yandex.ru>
  */
+
 
 return [
     'workflow_zf2_toolkit' => [
@@ -13,34 +14,37 @@ return [
          * Например
          * DoctrineWorkflowStory\ExtEntry => MyClass::class
          */
-        'entityMap' => [],
+        'entityMap'                         => [],
 
         /**
          * Метаданные используемые для получения id процесса wf(entryId).
          * Пример:
-         * workflow_entry_to_object_metadata => [
-         *     'key' => [
-         *         'workflowManagerName'  => $workflowManagerName,
-         *         'workflowManagerAlias' => $workflowManagerAlias,
-         *         'workflowName'         => $workflowName,
-         *         'routeName'            => $routeName
-         *         'map' => [
-         *              'key1' => [
-         *                  'entityClassName' => $entityClassName,
-         *                  'identifiersMap' => [
-         *                     'key2' => [
-         *                          'propertyName' => $propertyName,
-         *                          'mode'         => 'param|query'
-         *                          'paramName'    => $paramName
-         *                     ]
-         *                  ]
-         *              ]
-         *          ]
-         *     ]
-         * ]
+         *'workflow_entry_to_object_metadata' => [
+         *    'key' => [
+         *        'workflowManagerName'  => $workflowManagerName,
+         *        'workflowManagerAlias' => $workflowManagerAlias,
+         *        'workflowName'         => $workflowName,
+         *        'routeName'            => $routeName,
+         *        'map' => [
+         *            'key1' => [
+         *                'entityClassName' => $entityClassName,
+         *                'identifiersMap'  => [
+         *                    'key2' => [
+         *                        'propertyName' => $propertyName,
+         *                        'mode'         => 'param|query',
+         *                        'paramName'    => $paramName
+         *                    ]
+         *                ]
+         *            ]
+         *        ]
+         *    ]
+         *]
          *
          * Необходимо помнить, что можно указать либо workflowManagerName, либо workflowManagerAlias.
          * В случае если укзать оба этих параметра, либо не указать ни один из них, будет брошено исключение.
+         * key, key1, key2 - любые уникальные значения. Используются что бы была возможность перегрузить конфиг на уровне
+         * приложения
+         *
          *
          * Где:
          * - $workflowManagerName  - имя менеджера workflow
@@ -54,7 +58,7 @@ return [
          *
          */
         'workflow_entry_to_object_metadata' => [
-            
+
         ]
     ]
 ];

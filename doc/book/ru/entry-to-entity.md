@@ -14,6 +14,7 @@
 ## Конфигурирование
 
 * Убедится что к драйверам метаданных доктрины добавлены соответствующие строки:
+
 ```php
 'doctrine' => [
     'driver' => [
@@ -28,6 +29,7 @@
 ```
 
 * При описание конфигурации менеджера wf корректно указано хранилище(\OldTown\Workflow\ZF2\Toolkit\DoctrineWorkflowStory\DoctrineWorkflowStory):
+
 ```php
 
 use \OldTown\Workflow\ZF2\Toolkit\DoctrineWorkflowStory\DoctrineWorkflowStory
@@ -95,29 +97,48 @@ use \OldTown\Workflow\ZF2\Toolkit\DoctrineWorkflowStory\DoctrineWorkflowStory
 Для осуществления процесса получения id необходимо в конфигах описать метаданные для маппинга:
 
 ```php
-return [
+'workflow_zf2_toolkit' => [
     'workflow_entry_to_object_metadata' => [
         'key' => [
-            'workflowManagerName' => $workflowManagerName,
-            'workflowName'        => $workflowName,
-            'map' => [
+            'workflowManagerName'  => $workflowManagerName,
+            'workflowManagerAlias' => $workflowManagerAlias,
+            'workflowName'         => $workflowName,
+            'routeName'            => $routeName,
+            'map'                  => [
                 'key1' => [
-                   'entityClassName' => $entityClassName,
-                   'routerParamName' => $routeParamName
+                    'entityClassName' => $entityClassName,
+                    'identifiersMap'  => [
+                        'key2' => [
+                            'propertyName' => $propertyName,
+                            'mode'         => 'param|query',
+                            'paramName'    => $paramName
+                        ]
+                    ]
                 ]
             ]
         ]
     ]
-];
+]
 ```
 
 Где:
 
-* $workflowManagerName - имя менеджера workflow
-* $workflowName        - имя используемого workflow
-* $entityClassName     - имя класса сущности которая привязывается к процессу wf
-* $routeParamName      - имя параметра роутера, по которому можно получить id сущности
- 
+Параметр             |Описание
+-----------------------------------
+$workflowManagerName |имя менеджера workflow
+$workflowManagerAlias|псевдоним менеджера workflow
+$workflowName        |имя используемого workflow
+$entityClassName     |имя класса сущности которая привязывается к процессу wf
+$routeName           |имя роутера
+$propertyName        |имя свойства сущности(должен быть геттер и зеттер) являющиеся первичным ключем(или частью первичного ключа)
+$paramName           |имя параметра, по которому можно получить значение для $propertyName
+
+Необходимо помнить, что можно указать либо workflowManagerName, либо workflowManagerAlias. В случае если укзать оба 
+этих параметра, либо не указать ни один из них, будет брошено исключение.
+
+key, key1, key2 - любые уникальные значения. Используются что бы была возможность перегрузить конфиг на уровне
+приложения
+
  
  
  
