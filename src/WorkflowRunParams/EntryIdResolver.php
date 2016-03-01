@@ -1,6 +1,6 @@
 <?php
 /**
- * @link  https://github.com/old-town/workflow-zf2-toolkit
+ * @link    https://github.com/old-town/workflow-zf2-toolkit
  * @author  Malofeykin Andrey  <and-rey2@yandex.ru>
  */
 namespace OldTown\Workflow\ZF2\Toolkit\WorkflowRunParams;
@@ -12,6 +12,8 @@ use OldTown\Workflow\ZF2\Dispatch\RunParamsHandler\RouteHandler\ResolveEntryIdEv
 use OldTown\Workflow\ZF2\Toolkit\EntryToObjects\EntryToObjectsService;
 use OldTown\Workflow\ZF2\Toolkit\Options\ModuleOptions;
 use Zend\Mvc\MvcEvent;
+use Zend\Log\LoggerInterface;
+use Zend\Http\Request;
 
 /**
  * Class EntryIdResolver
@@ -28,6 +30,13 @@ class EntryIdResolver extends AbstractListenerAggregate
     const WORKFLOW_MANAGER_NAME = 'workflowManagerName';
 
     /**
+     * Имя параметра в конфиги модуля, по которому можно получить имя псевдонима менеджера wf
+     *
+     * @var string
+     */
+    const WORKFLOW_MANAGER_ALIAS = 'workflowManagerAlias';
+
+    /**
      * Имя параметра в конфиге модуля, по которому можно получить имя wf
      *
      * @var string
@@ -35,8 +44,15 @@ class EntryIdResolver extends AbstractListenerAggregate
     const WORKFLOW_NAME = 'workflowName';
 
     /**
-     * Имя параметра в конфиге модуля, по которому можно конфиг описывающий какие классы и какие имена параметров роуетера
-     * используется, для получения entryId
+     * Имя параметра в конфиге модуля, по которому можно получить значение имени роутера
+     *
+     * @var string
+     */
+    const ROUTER_NAME = 'routeName';
+
+    /**
+     * Имя параметра в конфиге модуля, по которому можно конфиг описывающий какие классы и какие имена параметров
+     * роуетера используется, для получения entryId
      *
      * @var string
      */
@@ -50,11 +66,63 @@ class EntryIdResolver extends AbstractListenerAggregate
     const ENTITY_CLASS_NAME = 'entityClassName';
 
     /**
-     * Имя параметра в карте(@see const MAP), по которому можно получить имя параметра роутера содержащего id сущности
+     * Имя параметра в карте(@see const MAP), по которому можно получить конфиг описывающий как для заданного свойства
+     * сущности(свойство является либо первичным ключем, либо составной частью первичного ключа) получиить из
+     * урл значение.
+     *
      *
      * @var string
      */
-    const ROUTER_PARAM_NAME = 'routerParamName';
+    const IDENTIFIERS_MAP = 'identifiersMap';
+
+    /**
+     * Имя параметра в карте(@see const IDENTIFIERS_MAP), по которому можно получить имя свойства сущности, которое
+     * является первичным ключем (или частью первичного ключа)
+     *
+     *
+     * @var string
+     */
+    const PROPERTY_NAME = 'propertyName';
+
+    /**
+     * Имя параметра в карте(@see const IDENTIFIERS_MAP), по которому можно определить как получить значение свойства,
+     * из параметра роутера, или из query
+     *
+     * @var string
+     */
+    const MODE = 'mode';
+
+    /**
+     * Значение для параметра mode (@see const MODE), определяет что значение берется из параметров роутера
+     *
+     * @var string
+     */
+    const MODE_ROUTER_PARAM = 'param';
+
+    /**
+     * Значение для параметра mode (@see const MODE), определяет что значение берется из query части url
+     *
+     * @var string
+     */
+    const MODE_QUERY = 'query';
+
+    /**
+     * Имя параметра в карте(@see const IDENTIFIERS_MAP), определяет имя параметра роутера или query параметра
+     * содержащие значение для propertyName (@see const PROPERTY_NAME)
+     *
+     * @var string
+     */
+    const PARAM_NAME = 'paramName';
+
+    /**
+     * Набор допустимых значений для mode (@see const MODE)
+     *
+     * @var array
+     */
+    protected $accessMode = [
+        self::MODE_ROUTER_PARAM => self::MODE_ROUTER_PARAM,
+        self::MODE_ROUTER_PARAM => self::MODE_ROUTER_PARAM,
+    ];
 
     /**
      * Сервис реализующий функционал, для привязки процессов wf и информации о объектаъ
@@ -83,6 +151,13 @@ class EntryIdResolver extends AbstractListenerAggregate
     protected $mvcEvent;
 
     /**
+     * Логер
+     *
+     * @var LoggerInterface
+     */
+    protected $log;
+
+    /**
      * EntryIdResolver constructor.
      *
      * @param array $options
@@ -92,24 +167,28 @@ class EntryIdResolver extends AbstractListenerAggregate
         $initOptions = [
             array_key_exists('entryToObjectsService', $options) ? $options['entryToObjectsService'] : null,
             array_key_exists('moduleOptions', $options) ? $options['moduleOptions'] : null,
-            array_key_exists('mvcEvent', $options) ? $options['mvcEvent'] : null
+            array_key_exists('mvcEvent', $options) ? $options['mvcEvent'] : null,
+            array_key_exists('log', $options) ? $options['log'] : null
         ];
         call_user_func_array([$this, 'init'], $initOptions);
     }
 
     /**
      * @param EntryToObjectsService $entryToObjectsService
-     * @param ModuleOptions                $moduleOptions
-     * @param MvcEvent                     $mvcEvent
+     * @param ModuleOptions         $moduleOptions
+     * @param MvcEvent              $mvcEvent
+     * @param LoggerInterface       $log
      */
     protected function init(
         EntryToObjectsService $entryToObjectsService,
         ModuleOptions $moduleOptions,
-        MvcEvent $mvcEvent
+        MvcEvent $mvcEvent,
+        LoggerInterface $log
     ) {
         $this->setEntryToObjectsService($entryToObjectsService);
         $this->setModuleOptions($moduleOptions);
         $this->setMvcEvent($mvcEvent);
+        $this->setLog($log);
     }
 
     /**
@@ -134,27 +213,62 @@ class EntryIdResolver extends AbstractListenerAggregate
      */
     public function onResolveEntryId(ResolveEntryIdEventInterface $resolveEntryIdEvent)
     {
+        $this->getLog()->info(
+            'Getting "entryId" Workflow to run, based on the data of the object bound to the process'
+        );
+
         $index = $this->getIndexMetadata();
 
         $managerName = $resolveEntryIdEvent->getManagerName();
-        if (!array_key_exists($managerName, $index)) {
-            return null;
-        }
-
+        $managerAlias = $resolveEntryIdEvent->getManagerAlias();
         $workflowName = $resolveEntryIdEvent->getWorkflowName();
-        if (!array_key_exists($workflowName, $index[$managerName]) || !is_array($index[$managerName][$workflowName])) {
-            return null;
-        }
 
         $routeMatch = $this->getMvcEvent()->getRouteMatch();
-        $objectsInfo = [];
-        foreach ($index[$managerName][$workflowName] as $entityClassName => $routerParamName) {
-            $entityId = $routeMatch->getParam($routerParamName, null);
-            if (null === $entityId) {
-                return null;
-            }
+        $routerName = $routeMatch->getMatchedRouteName();
 
-            $objectsInfo[$entityClassName] = $entityId;
+        $indexKeys = $this->buildIndexKeys($routerName, $workflowName, $managerName, $managerAlias);
+
+        $metadata = null;
+        foreach ($indexKeys as $indexKey) {
+            if (array_key_exists($indexKey, $index)) {
+                $metadata = $index[$indexKey];
+                break;
+            }
+        }
+
+        if (null === $metadata) {
+            $this->getLog()->info(
+                'Metadata for "entryId" not found'
+            );
+            return null;
+        }
+
+        $objectsInfo = [];
+
+        foreach ($metadata as $entityClassName => $metadataItem) {
+            $objectsInfo[$entityClassName] = [];
+            foreach ($metadataItem as $propertyName => $info) {
+                $mode = $info[static::MODE];
+                $paramName = $info[static::PARAM_NAME];
+
+                $idValue = null;
+                if (static::MODE_ROUTER_PARAM === $mode) {
+                    $idValue = $routeMatch->getParam($paramName, null);
+                }
+
+                if (static::MODE_QUERY === $mode) {
+                    $request = $this->getMvcEvent()->getRequest();
+                    if ($request instanceof Request) {
+                        $idValue = $request->getQuery($paramName, null);
+                    }
+                }
+
+                if (null === $idValue) {
+                    $errMsg = sprintf('Error getting the primary identifier for the entity\'s key. Source: %s. Value: %s', $mode, $paramName);
+                    throw new Exception\InvalidWorkflowEntryToObjectMetadataException($errMsg);
+                }
+                $objectsInfo[$entityClassName][$propertyName] = $idValue;
+            }
         }
 
         $entry = $this->getEntryToObjectsService()->getEntryByObjectsInfo($managerName, $workflowName, $objectsInfo);
@@ -164,6 +278,45 @@ class EntryIdResolver extends AbstractListenerAggregate
         }
 
         return $entry->getId();
+    }
+
+    /**
+     * Подготавливает набор ключей для поиска в индексе
+     *
+     * @param string $routerName
+     * @param string $workflowName
+     * @param null   $managerName
+     * @param null   $managerAlias
+     *
+     * @return array
+     */
+    public function buildIndexKeys($routerName, $workflowName, $managerName = null, $managerAlias = null)
+    {
+        $keys = [];
+
+        $prefixes =[];
+        if (null !== $managerAlias) {
+            $prefixes[] = sprintf('alias_%s_%s_', $managerAlias, $workflowName);
+        }
+        if (null !== $managerName) {
+            $prefixes[] = sprintf('name_%s_%s_', $managerName, $workflowName);
+        }
+
+        $prepareRouteParts = [];
+        $stackRouteParts = explode('/', $routerName);
+
+        for ($i = count($stackRouteParts); $i >= 1; $i--) {
+            $routeParts = array_slice($stackRouteParts, 0, $i);
+            $prepareRouteParts[] = implode('/', $routeParts);
+        }
+
+        foreach ($prefixes as $prefix) {
+            foreach ($prepareRouteParts as $prepareRoutePart) {
+                $keys[] = $prefix . $prepareRoutePart;
+            }
+        }
+
+        return $keys;
     }
 
     /**
@@ -180,17 +333,54 @@ class EntryIdResolver extends AbstractListenerAggregate
 
         $index = [];
         foreach ($metadata as $metadataItem) {
-            if (!array_key_exists(static::WORKFLOW_MANAGER_NAME, $metadataItem)) {
-                $errMsg = sprintf('there is no option %s', static::WORKFLOW_MANAGER_NAME);
+            if (!array_key_exists(static::WORKFLOW_MANAGER_NAME, $metadataItem) && !array_key_exists(static::WORKFLOW_MANAGER_ALIAS, $metadataItem)) {
+                $errMsg = sprintf(
+                    'You must specify the %s or %s',
+                    static::WORKFLOW_MANAGER_NAME,
+                    static::WORKFLOW_MANAGER_ALIAS
+                );
                 throw new Exception\InvalidWorkflowEntryToObjectMetadataException($errMsg);
             }
-            $workflowManagerName = $metadataItem[static::WORKFLOW_MANAGER_NAME];
+
+            if (array_key_exists(static::WORKFLOW_MANAGER_NAME, $metadataItem) && array_key_exists(static::WORKFLOW_MANAGER_ALIAS, $metadataItem)) {
+                $errMsg = sprintf(
+                    'You can not specify both %s and %s',
+                    static::WORKFLOW_MANAGER_NAME,
+                    static::WORKFLOW_MANAGER_ALIAS
+                );
+                throw new Exception\InvalidWorkflowEntryToObjectMetadataException($errMsg);
+            }
 
             if (!array_key_exists(static::WORKFLOW_NAME, $metadataItem)) {
                 $errMsg = sprintf('there is no option %s', static::WORKFLOW_NAME);
                 throw new Exception\InvalidWorkflowEntryToObjectMetadataException($errMsg);
             }
             $workflowName = $metadataItem[static::WORKFLOW_NAME];
+
+            if (!array_key_exists(static::ROUTER_NAME, $metadataItem)) {
+                $errMsg = sprintf('there is no option %s', static::ROUTER_NAME);
+                throw new Exception\InvalidWorkflowEntryToObjectMetadataException($errMsg);
+            }
+            $routerName = $metadataItem[static::ROUTER_NAME];
+
+            $prefix = '';
+            if (array_key_exists(static::WORKFLOW_MANAGER_NAME, $metadataItem)) {
+                $prefix = 'name_' . $metadataItem[static::WORKFLOW_MANAGER_NAME] . '_';
+            }
+
+            if (array_key_exists(static::WORKFLOW_MANAGER_ALIAS, $metadataItem)) {
+                $prefix = 'alias_' . $metadataItem[static::WORKFLOW_MANAGER_ALIAS] . '_';
+            }
+
+            $uniqueKey = $prefix . $workflowName . '_' . $routerName;
+
+            if (array_key_exists($uniqueKey, $index)) {
+                $errMsg = sprintf('Index contains duplicate keys %s', $uniqueKey);
+                throw new Exception\InvalidWorkflowEntryToObjectMetadataException($errMsg);
+            }
+
+            $index[$uniqueKey] = [];
+
 
             if (!array_key_exists(static::MAP, $metadataItem)) {
                 $errMsg = sprintf('there is no option %s', static::MAP);
@@ -202,13 +392,6 @@ class EntryIdResolver extends AbstractListenerAggregate
             }
             $map = $metadataItem[static::MAP];
 
-            if (!array_key_exists($workflowManagerName, $index)) {
-                $index[$workflowManagerName] = [];
-            }
-            if (!array_key_exists($workflowName, $index[$workflowManagerName])) {
-                $index[$workflowManagerName][$workflowName] = [];
-            }
-
             foreach ($map as $mapItem) {
                 if (!array_key_exists(static::ENTITY_CLASS_NAME, $mapItem)) {
                     $errMsg = sprintf('there is no option %s', static::ENTITY_CLASS_NAME);
@@ -216,20 +399,55 @@ class EntryIdResolver extends AbstractListenerAggregate
                 }
                 $entityClassName = $mapItem[static::ENTITY_CLASS_NAME];
 
-                if (array_key_exists($entityClassName, $index[$workflowManagerName][$workflowName])) {
+                if (array_key_exists($entityClassName, $index[$uniqueKey])) {
                     $errMsg = sprintf('Metadata for entities already exist %s', $mapItem[static::ENTITY_CLASS_NAME]);
                     throw new Exception\InvalidWorkflowEntryToObjectMetadataException($errMsg);
                 }
+                $index[$uniqueKey][$entityClassName] = [];
 
-                if (!array_key_exists(static::ROUTER_PARAM_NAME, $mapItem)) {
-                    $errMsg = sprintf('there is no option %s', static::ROUTER_PARAM_NAME);
+                if (!array_key_exists(static::IDENTIFIERS_MAP, $mapItem)) {
+                    $errMsg = sprintf('there is no option %s', static::IDENTIFIERS_MAP);
                     throw new Exception\InvalidWorkflowEntryToObjectMetadataException($errMsg);
                 }
-                $routerParamName = $mapItem[static::ROUTER_PARAM_NAME];
+                if (!is_array($mapItem[static::IDENTIFIERS_MAP])) {
+                    $errMsg = sprintf('option %s is not array', static::IDENTIFIERS_MAP);
+                    throw new Exception\InvalidWorkflowEntryToObjectMetadataException($errMsg);
+                }
 
-                $index[$workflowManagerName][$workflowName][$entityClassName] = $routerParamName;
+                $identifiersMap = $mapItem[static::IDENTIFIERS_MAP];
+
+                foreach ($identifiersMap as $identifierItem) {
+                    if (!array_key_exists(static::PROPERTY_NAME, $identifierItem)) {
+                        $errMsg = sprintf('there is no option %s', static::PROPERTY_NAME);
+                        throw new Exception\InvalidWorkflowEntryToObjectMetadataException($errMsg);
+                    }
+                    $propertyName = $identifierItem[static::PROPERTY_NAME];
+
+                    if (array_key_exists($propertyName, $index[$uniqueKey][$entityClassName])) {
+                        $errMsg = sprintf('Metadata for property already exist %s', $propertyName);
+                        throw new Exception\InvalidWorkflowEntryToObjectMetadataException($errMsg);
+                    }
+                    $index[$uniqueKey][$entityClassName][$propertyName] = [];
+
+                    $modeOriginal = array_key_exists(static::MODE, $identifierItem) ? $identifierItem[static::MODE] : static ::MODE_ROUTER_PARAM;
+                    $mode = strtolower($modeOriginal);
+
+                    if (!array_key_exists($mode, $this->accessMode)) {
+                        $errMsg = sprintf('Invalid value for the "mode" %s', $mode);
+                        throw new Exception\InvalidWorkflowEntryToObjectMetadataException($errMsg);
+                    }
+                    $index[$uniqueKey][$entityClassName][$propertyName][static::MODE] = $mode;
+
+                    if (!array_key_exists(static::PARAM_NAME, $identifierItem)) {
+                        $errMsg = sprintf('there is no option %s', static::PARAM_NAME);
+                        throw new Exception\InvalidWorkflowEntryToObjectMetadataException($errMsg);
+                    }
+                    $paramName = $identifierItem[static::PARAM_NAME];
+                    $index[$uniqueKey][$entityClassName][$propertyName][static::PARAM_NAME] = $paramName;
+                }
             }
         }
+
         $this->indexMetadata = $index;
 
         return $this->indexMetadata;
@@ -312,6 +530,31 @@ class EntryIdResolver extends AbstractListenerAggregate
     public function setMvcEvent(MvcEvent $mvcEvent)
     {
         $this->mvcEvent = $mvcEvent;
+
+        return $this;
+    }
+
+
+    /**
+     * Устанавливает логер
+     *
+     * @return LoggerInterface
+     */
+    public function getLog()
+    {
+        return $this->log;
+    }
+
+    /**
+     * Возвращает логер
+     *
+     * @param LoggerInterface $log
+     *
+     * @return $this
+     */
+    public function setLog(LoggerInterface $log)
+    {
+        $this->log = $log;
 
         return $this;
     }

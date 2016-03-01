@@ -20,16 +20,18 @@ return [
          * Пример:
          * workflow_entry_to_object_metadata => [
          *     'key' => [
-         *         'workflowManagerName' => $workflowManagerName,
-         *         'workflowName'        => $workflowName,
-         *         'routeName'           => $routeName
+         *         'workflowManagerName'  => $workflowManagerName,
+         *         'workflowManagerAlias' => $workflowManagerAlias,
+         *         'workflowName'         => $workflowName,
+         *         'routeName'            => $routeName
          *         'map' => [
          *              'key1' => [
          *                  'entityClassName' => $entityClassName,
          *                  'identifiersMap' => [
-         *                     $propertyName => [
-         *                          'mode' => 'param|query'
-         *                          'name' => $name
+         *                     'key2' => [
+         *                          'propertyName' => $propertyName,
+         *                          'mode'         => 'param|query'
+         *                          'paramName'    => $paramName
          *                     ]
          *                  ]
          *              ]
@@ -37,11 +39,17 @@ return [
          *     ]
          * ]
          *
+         * Необходимо помнить, что можно указать либо workflowManagerName, либо workflowManagerAlias.
+         * В случае если укзать оба этих параметра, либо не указать ни один из них, будет брошено исключение.
+         *
          * Где:
-         * - $workflowManagerName - имя менеджера workflow
-         * - $workflowName        - имя используемого workflow
-         * - $entityClassName     - имя класса сущности которая привязывается к процессу wf
-         * - $routeParamName      - имя параметра роутера
+         * - $workflowManagerName  - имя менеджера workflow
+         * - $workflowManagerAlias - псевдоним менеджера workflow
+         * - $workflowName         - имя используемого workflow
+         * - $entityClassName      - имя класса сущности которая привязывается к процессу wf
+         * - $routeName            - имя роутера
+         * - $propertyName         - имя свойства сущности(должен быть геттер и зеттер) являющиеся первичным ключем(или частью первичного ключа)
+         * - $paramName            - имя параметра, по которому можно получить значение для $propertyName
          *
          *
          */

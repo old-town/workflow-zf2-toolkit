@@ -1,7 +1,7 @@
 <?php
 /**
  * @link     https://github.com/old-town/workflow-zf2-toolkit
- * @author  Malofeykin Andrey  <and-rey2@yandex.ru>
+ * @author   Malofeykin Andrey  <and-rey2@yandex.ru>
  */
 namespace OldTown\Workflow\ZF2\Toolkit\PhpUnit\TestData\BindObjectToWorkflowEntryIntegrationTest;
 
@@ -16,48 +16,85 @@ use OldTown\Workflow\ZF2\Toolkit\PhpUnit\TestData\TestPaths;
 use \OldTown\Workflow\ZF2\Toolkit\PhpUnit\TestData\BindObjectToWorkflowEntryIntegrationTest\Entity\TestEntity;
 
 return [
-    'router' => [
-        'routes' => [
-            'testInitialize' => [
-                'type' => 'Segment',
-                'options' => [
-                    'route' => 'initialize/:expectedValue',
-                    'defaults'=> [
-                        'controller' => TestController::class,
-                        'action' => 'initialize',
-
-                        'workflowManagerName' => 'testWorkflowManager',
-                        'workflowActionName' => 'initAction',
-                        'workflowName' => 'test',
-
-                    ],
-                ],
-            ],
-            'testDoAction' => [
-                'type' => 'Segment',
-                'options' => [
-                    'route' => 'doAction/:testObjectId',
-                    'defaults'=> [
-                        'controller' => TestController::class,
-                        'action' => 'do',
-
-                        'workflowManagerName' => 'testWorkflowManager',
-                        'workflowName' => 'test',
-                        'workflowActionName' => 'dummyAction'
-
-                    ],
+    'workflow_zf2_toolkit' => [
+        'workflow_entry_to_object_metadata' => [
+            'test' => [
+                'workflowManagerAlias' => 'aliasForTest',
+                'workflowName'         => 'test',
+                'routeName'            => 'testRootRouter/level1',
+                'map'                  => [
+                    'key1' => [
+                        'entityClassName' => TestEntity::class,
+                        'identifiersMap'  => [
+                            'id' => [
+                                'propertyName' => 'id',
+                                'mode'         => 'param',
+                                'paramName'    => 'testObjectId'
+                            ]
+                        ]
+                    ]
                 ],
             ]
         ]
     ],
-    'doctrine' => [
+    'router'               => [
+        'routes' => [
+            'testRootRouter' => [
+                'type'         => 'literal',
+                'options'      => [
+                    'route' => '/',
+                ],
+                'child_routes' => [
+                    'level1' => [
+                        'type'         => 'literal',
+                        'options'      => [
+                            'route' => 'level1/',
+                        ],
+                        'child_routes' => [
+                            'testInitialize' => [
+                                'type'    => 'Segment',
+                                'options' => [
+                                    'route'    => 'initialize/:expectedValue',
+                                    'defaults' => [
+                                        'controller' => TestController::class,
+                                        'action'     => 'initialize',
+
+                                        'workflowManagerName' => 'testWorkflowManager',
+                                        'workflowActionName'  => 'initAction',
+                                        'workflowName'        => 'test',
+
+                                    ],
+                                ],
+                            ],
+                            'testDoAction'   => [
+                                'type'    => 'Segment',
+                                'options' => [
+                                    'route'    => 'doAction/:testObjectId',
+                                    'defaults' => [
+                                        'controller' => TestController::class,
+                                        'action'     => 'do',
+
+                                        'workflowManagerAlias' => 'aliasForTest',
+                                        'workflowName'        => 'test',
+                                        'workflowActionName'  => 'dummyAction'
+
+                                    ],
+                                ],
+                            ]
+                        ]
+                    ]
+                ],
+            ],
+        ]
+    ],
+    'doctrine'             => [
         'entitymanager' => [
             'test' => [
                 'configuration' => 'test',
                 'connection'    => 'test',
             ]
         ],
-        'connection' => [
+        'connection'    => [
             'test' => [
                 'configuration' => 'test',
                 'eventmanager'  => 'orm_default',
@@ -65,28 +102,28 @@ return [
         ],
         'configuration' => [
             'test' => [
-                'metadata_cache'    => 'array',
-                'query_cache'       => 'array',
-                'result_cache'      => 'array',
-                'hydration_cache'   => 'array',
-                'driver'            => 'test',
-                'generate_proxies'  => true,
+                'metadata_cache'   => 'array',
+                'query_cache'      => 'array',
+                'result_cache'     => 'array',
+                'hydration_cache'  => 'array',
+                'driver'           => 'test',
+                'generate_proxies' => true,
 
-                'proxy_dir'         => TestPaths::getPathToDoctrineProxyDir(),
-                'proxy_namespace'   => 'DoctrineORMModule\Proxy',
-                'filters'           => [],
+                'proxy_dir'          => TestPaths::getPathToDoctrineProxyDir(),
+                'proxy_namespace'    => 'DoctrineORMModule\Proxy',
+                'filters'            => [],
                 'datetime_functions' => [],
-                'string_functions' => [],
-                'numeric_functions' => [],
+                'string_functions'   => [],
+                'numeric_functions'  => [],
                 'second_level_cache' => []
             ]
         ],
-        'driver' => [
-            'test' => [
+        'driver'        => [
+            'test'       => [
                 'class'   => 'Doctrine\ORM\Mapping\Driver\DriverChain',
                 'drivers' => [
-                    'OldTown\\Workflow\\Spi\\Doctrine\\Entity' => 'WorkflowDoctrineEntity',
-                    'OldTown\\Workflow\\ZF2\\Toolkit\\Entity' => 'entityToolkit',
+                    'OldTown\\Workflow\\Spi\\Doctrine\\Entity'                                                            => 'WorkflowDoctrineEntity',
+                    'OldTown\\Workflow\\ZF2\\Toolkit\\Entity'                                                             => 'entityToolkit',
                     'OldTown\\Workflow\\ZF2\\Toolkit\\PhpUnit\\TestData\BindObjectToWorkflowEntryIntegrationTest\\Entity' => 'testEntity',
                 ]
             ],
@@ -96,24 +133,24 @@ return [
             ],
         ]
     ],
-    'workflow_zf2'    => [
+    'workflow_zf2'         => [
         'configurations' => [
             'default' => [
                 'persistence' => [
-                    'name' => DoctrineWorkflowStory::class,
+                    'name'    => DoctrineWorkflowStory::class,
                     'options' => [
                         DoctrineWorkflowStory::ENTITY_MANAGER_FACTORY => [
-                            DoctrineWorkflowStory::ENTITY_MANAGER_FACTORY_NAME => EntityManagerFactory::class,
+                            DoctrineWorkflowStory::ENTITY_MANAGER_FACTORY_NAME    => EntityManagerFactory::class,
                             DoctrineWorkflowStory::ENTITY_MANAGER_FACTORY_OPTIONS => [
                                 EntityManagerFactory::ENTITY_MANAGER_NAME => 'doctrine.entitymanager.test'
                             ]
                         ]
                     ]
                 ],
-                'factory' => [
-                    'name' => ArrayWorkflowFactory::class,
+                'factory'     => [
+                    'name'    => ArrayWorkflowFactory::class,
                     'options' => [
-                        'reload' => true,
+                        'reload'    => true,
                         'workflows' => [
                             'test' => [
                                 'location' => __DIR__ . '/test_workflow.xml'
@@ -121,33 +158,22 @@ return [
                         ]
                     ]
                 ],
-                'resolver' => DefaultVariableResolver::class,
+                'resolver'    => DefaultVariableResolver::class,
             ]
         ],
 
-        'managers' => [
+        'managers'        => [
             'testWorkflowManager' => [
                 'configuration' => 'default',
-                'name' => BasicWorkflow::class
+                'name'          => BasicWorkflow::class
             ]
-        ]
-    ],
-    'workflow_zf2_toolkit' => [
-        'workflow_entry_to_object_metadata' => [
-            'test' => [
-                'workflowManagerName' => 'testWorkflowManager',
-                'workflowName' => 'test',
-                'map' => [
-                    'default' => [
-                        'entityClassName' => TestEntity::class,
-                        'routerParamName' => 'testObjectId'
-                    ]
-                ]
-            ]
+        ],
+        'manager_aliases' => [
+            'aliasForTest' => 'testWorkflowManager'
         ]
     ],
 
-    'controllers' => [
+    'controllers'  => [
         'invokables' => [
             TestController::class => TestController::class
         ]
@@ -155,7 +181,7 @@ return [
     'view_manager' => [
         'template_map' => [
             'old-town/test/initialize' => __DIR__ . '/../../view/initialize.phtml',
-            'old-town/test/do' => __DIR__ . '/../../view/do.phtml'
+            'old-town/test/do'         => __DIR__ . '/../../view/do.phtml'
         ],
     ]
 ];

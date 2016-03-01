@@ -24,6 +24,7 @@
     "old-town/workflow": "dev-dev",
     "old-town/workflow-zf2-dispatch": "dev-dev",
     "zendframework/zend-mvc": "~2.4",
+    "zendframework/zend-http": "~2.4",
     "zendframework/zend-stdlib": "~2.4",
     "zendframework/zend-servicemanager": "~2.4",
     "zendframework/zend-validator": "~2.4"

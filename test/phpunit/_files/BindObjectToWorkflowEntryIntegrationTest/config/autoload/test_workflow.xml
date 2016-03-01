@@ -9,7 +9,9 @@
                     <arg name="serviceName">\OldTown\Workflow\ZF2\Toolkit\EntryToObjects\EntryToObjectsService</arg>
                     <arg name="serviceMethod">bindObjectToWorkflowEntry</arg>
 
-                    <arg name="objectParam">testObject</arg>
+                    <arg name="entry">${entry}</arg>
+                    <arg name="store">${store}</arg>
+                    <arg name="object">${testObject}</arg>
                     <arg name="objectAlias">testObjectAlias</arg>
 
 
@@ -29,6 +31,8 @@
                             <arg name="serviceName">\OldTown\Workflow\ZF2\Toolkit\EntryToObjects\EntryToObjectsService</arg>
                             <arg name="serviceMethod">restoreObjectBindingToEntry</arg>
 
+                            <arg name="entry">${entry}</arg>
+                            <arg name="store">${store}</arg>
                             <arg name="objectAlias">testObjectAlias</arg>
                             <arg name="resultVariableName">actualResult</arg>
 

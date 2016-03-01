@@ -5,6 +5,8 @@
  */
 namespace OldTown\Workflow\ZF2\Toolkit;
 
+use OldTown\Workflow\ZF2\Toolkit\Options\ModuleOptions;
+
 $config = [
     'workflow_zf2_toolkit' => [
         /**
@@ -44,7 +46,9 @@ $config = [
          */
         'workflow_entry_to_object_metadata' => [
 
-        ]
+        ],
+        /** Имя используемого логгера */
+        ModuleOptions::LOG_NAME => null
     ]
 ];
 

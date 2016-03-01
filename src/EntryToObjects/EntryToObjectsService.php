@@ -93,12 +93,6 @@ class EntryToObjectsService
     }
 
     /**
-     * @WFS\ArgumentsMap(argumentsMap={
-     *      @WFS\Map(fromArgName="entryParam", to="entry"),
-     *      @WFS\Map(fromArgName="objectParam", to="object"),
-     *      @WFS\Map(fromArgName="objectAliasParam", to="objectAlias"),
-     *      @WFS\Map(fromArgName="storeParam", to="store")
-     *})
      *
      *
      * @param ExtEntry               $entry
@@ -153,12 +147,6 @@ class EntryToObjectsService
     /**
      * Востановить объект привязанный к процессу
      *
-     * @WFS\ArgumentsMap(argumentsMap={
-     *      @WFS\Map(fromArgName="entryParam", to="entry"),
-     *      @WFS\Map(fromArgName="objectAliasParam", to="objectAlias"),
-     *      @WFS\Map(fromArgName="storeParam", to="store")
-     * })
-     *
      * @WFS\ResultVariable(name="resultVariableName")
      *
      *
@@ -208,7 +196,20 @@ class EntryToObjectsService
 
 
     /**
-     * Получене информации о процессе на основе данных о объекта привязанных к процессу
+     * Получене информации о процессе на основе данных о объектах привязанных к процессу
+     *
+     * Структура objectsInfo
+     * $objectsInfo = [
+     *      $entityClassName => [
+     *          $propertyName => $idValue
+     *      ]
+     * ]
+     *
+     * Где:
+     * $entityClassName - имя класса сущности которая привязана к процессу workflow
+     * $propertyName    - имя свойства сущности являющееся первичным ключем (или часть составного первичного ключа)
+     * $idValue         - значение $propertyName
+     *
      *
      * @param string $managerName
      * @param string $workflowName
@@ -235,11 +236,19 @@ class EntryToObjectsService
 
             $serializer = $this->getSerializer();
             $objectHash = [];
-            foreach ($objectsInfo as $entityClassName => $entityId) {
-                $identifierFieldName = $em->getClassMetadata($entityClassName)->getSingleIdentifierFieldName();
-                $id = [
-                    $identifierFieldName => (string)$entityId
-                ];
+            foreach ($objectsInfo as $entityClassName => $item) {
+                $classMetadata = $em->getClassMetadata($entityClassName);
+                $identifierMetadata = $classMetadata->getIdentifier();
+
+                $id = [];
+
+                foreach ($identifierMetadata as $propertyName) {
+                    if (!array_key_exists($propertyName, $item)) {
+                        $errMsg = sprintf('Property %s not found', $propertyName);
+                        throw new Exception\InvalidGetEntryByObjectsInfoException($errMsg);
+                    }
+                    $id[$propertyName] = (string)$item[$propertyName];
+                }
 
                 $serializedId = $serializer->serialize($id);
 

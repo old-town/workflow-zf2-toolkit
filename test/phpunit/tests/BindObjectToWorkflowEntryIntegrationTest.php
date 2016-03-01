@@ -74,7 +74,7 @@ class BindObjectToWorkflowEntryIntegrationTest extends AbstractHttpControllerTes
         $app = $this->getApplication();
 
         $expectedValue = 'test_completed';
-        $url = sprintf('initialize/%s', $expectedValue);
+        $url = sprintf('/level1/initialize/%s', $expectedValue);
         $this->dispatch($url);
 
         /** @var WorkflowDispatchEvent $dispatchEvent */
@@ -84,7 +84,7 @@ class BindObjectToWorkflowEntryIntegrationTest extends AbstractHttpControllerTes
         /** @var TestEntity $testObject */
         $testObject = $transientVars['testObject'];
 
-        $url = sprintf('doAction/%s', $testObject->getId());
+        $url = sprintf('/level1/doAction/%s', $testObject->getId());
         $this->dispatch($url);
 
         /** @var WorkflowDispatchEvent $dispatchEvent */

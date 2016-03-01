@@ -15,6 +15,11 @@ use Zend\Stdlib\AbstractOptions;
 class ModuleOptions extends AbstractOptions
 {
     /**
+     * @var string
+     */
+    const LOG_NAME = 'logName';
+
+    /**
      * Наймспейс для сущностей.
      *
      * @var string
@@ -34,6 +39,13 @@ class ModuleOptions extends AbstractOptions
      * @var array
      */
     protected $workflowEntryToObjectMetadata = [];
+
+    /**
+     * Имя используемого логера
+     *
+     * @var string|null
+     */
+    protected $logName;
 
     /**
      * @return string
@@ -111,6 +123,31 @@ class ModuleOptions extends AbstractOptions
     public function setWorkflowEntryToObjectMetadata(array $workflowEntryToObjectMetadata = [])
     {
         $this->workflowEntryToObjectMetadata = $workflowEntryToObjectMetadata;
+
+        return $this;
+    }
+
+
+    /**
+     * Имя используемого логера
+     *
+     * @return null|string
+     */
+    public function getLogName()
+    {
+        return $this->logName;
+    }
+
+    /**
+     * Имя используемого логера
+     *
+     * @param null|string $logName
+     *
+     * @return $this
+     */
+    public function setLogName($logName)
+    {
+        $this->logName = $logName;
 
         return $this;
     }
