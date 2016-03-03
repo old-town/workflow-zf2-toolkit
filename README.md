@@ -17,6 +17,3 @@ Develop:
 = Документация =
 - [Online documentation](http://workflow-zf2-toolkit.readthedocs.org/ru/dev/)
 - [Documentation source files](doc/book/ru/)
-
-
-
