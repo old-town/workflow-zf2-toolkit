@@ -38,6 +38,7 @@ class ExtEntryRepository extends EntityRepository
               entry.workflowName = :workflowName
                 AND
               objectInfo.hash IN (:hash)
+          GROUP BY entry.id
           ";
         $query = $this->_em->createQuery($dql);
         $query->setParameter('workflowName', $workflowName);
