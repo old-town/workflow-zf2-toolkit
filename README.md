@@ -12,7 +12,7 @@ Develop:
 
 [![Build Status](https://travis-ci.org/old-town/workflow-zf2-toolkit.svg?branch=dev)](https://travis-ci.org/old-town/workflow-zf2-toolkit)
 [![Coverage Status](https://coveralls.io/repos/github/old-town/workflow-zf2-toolkit/badge.svg?branch=dev)](https://coveralls.io/github/old-town/workflow-zf2-toolkit?branch=dev)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/old-town/workflow-zf2-dispatch/badges/quality-score.png?b=dev)](https://scrutinizer-ci.com/g/old-town/workflow-zf2-dispatch/?branch=dev)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/old-town/workflow-zf2-toolkit/badges/quality-score.png?b=dev)](https://scrutinizer-ci.com/g/old-town/workflow-zf2-toolkit/?branch=dev)
 [![Documentation Status](https://readthedocs.org/projects/workflow-zf2-toolkit/badge/?version=dev)](http://workflow-zf2-toolkit.readthedocs.org/ru/latest/?badge=dev)
 
 # Описание модуля
