@@ -6,14 +6,17 @@
 namespace OldTown\Workflow\ZF2\Toolkit;
 
 use OldTown\Workflow\ZF2\Toolkit\Validator\HttpMethod;
+use OldTown\Workflow\ZF2\Toolkit\Validator\PrepareData;
 
 return [
     'validators' => [
         'invokables' => [
-            HttpMethod::class => HttpMethod::class
+            HttpMethod::class => HttpMethod::class,
+            PrepareData::class => PrepareData::class
         ],
         'aliases' => [
-            'httpMethod' => HttpMethod::class
+            'httpMethod' => HttpMethod::class,
+            'prepareData' => PrepareData::class,
         ]
     ]
 ];
