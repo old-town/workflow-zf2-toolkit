@@ -52,10 +52,10 @@ class PrepareData extends AbstractValidator
      *
      * @var array
      */
-    protected $messageVariables = array(
-        'paramNameInPrepareData' => array('options' => 'paramNameInPrepareData'),
-        'typeExpectedValue' => array('options' => 'typeExpectedValue'),
-    );
+    protected $messageVariables = [
+        'paramNameInPrepareData' => ['options' => 'paramNameInPrepareData'],
+        'typeExpectedValue' => ['options' => 'typeExpectedValue'],
+    ];
 
     /**
      * @var array
@@ -127,5 +127,4 @@ class PrepareData extends AbstractValidator
 
         return $rawExpectedValue;
     }
-
 }
