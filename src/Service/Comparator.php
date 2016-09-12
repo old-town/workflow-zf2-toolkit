@@ -5,7 +5,6 @@
  */
 namespace OldTown\Workflow\ZF2\Toolkit\Service;
 
-
 /**
  * Class Comparator
  *
@@ -26,7 +25,6 @@ class Comparator
      */
     public function compare($expectedValue, $actualValue, $expectedValueType = null)
     {
-
         $typeExpectedValue = is_string($expectedValueType) ? $expectedValueType : 'string';
         $expected = $this->getExpectedValue($expectedValue, $typeExpectedValue);
 
