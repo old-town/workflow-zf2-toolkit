@@ -28,6 +28,11 @@ class ExtEntryRepository extends EntityRepository
     public function findEntryByObjectInfo($workflowName, array $objectHash = [])
     {
         $entryClassName = ExtEntry::class;
+        $excludeStatuses = [
+            ExtEntry::KILLED,
+            ExtEntry::COMPLETED,
+            ExtEntry::UNKNOWN
+        ];
 
         $dql = "
           SELECT
@@ -38,11 +43,14 @@ class ExtEntryRepository extends EntityRepository
               entry.workflowName = :workflowName
                 AND
               objectInfo.hash IN (:hash)
+                AND
+              entry.state NOT IN (:statuses)
           GROUP BY entry.id
           ";
         $query = $this->_em->createQuery($dql);
         $query->setParameter('workflowName', $workflowName);
-        $query->setParameter('hash', $objectHash);
+        $query->setParameter('hash', array_values($objectHash));
+        $query->setParameter('statuses', $excludeStatuses, \Doctrine\DBAL\Connection::PARAM_INT_ARRAY);
 
         return $query->getSingleResult();
     }
